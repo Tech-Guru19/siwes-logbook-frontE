@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, Mail, Lock, Building, KeyRound, CheckCircle2, RefreshCw, ArrowRight } from 'lucide-react'
+import { ArrowLeft, Mail as MailIcon, Lock, Building, KeyRound, CheckCircle2, RefreshCw, ArrowRight } from 'lucide-react'
 
 const SchoolSignup = () => {
     const navigate = useNavigate()
@@ -103,7 +103,7 @@ const SchoolSignup = () => {
                             <label className="block text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Admin Email Address</label>
                             <div className="relative flex gap-3">
                                 <div className="relative flex-1">
-                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" strokeWidth={1.5} />
+                                    <MailIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" strokeWidth={1.5} />
                                     <input
                                         className="w-full h-14 pl-12 pr-4 bg-white border border-slate-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none text-sm font-medium transition-all disabled:opacity-60 disabled:bg-slate-50"
                                         placeholder="admin@institution.edu.ng"
