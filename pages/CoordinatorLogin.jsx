@@ -1,4 +1,6 @@
+import React, { useState } from "react";
 const CoordinatorLogin = () => {
+  const [showPassword, setShowPassword] = useState(false);
   return (
     <>
       <body className="bg-background text-on-background font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed">
@@ -77,12 +79,21 @@ const CoordinatorLogin = () => {
                     >
                       Password
                     </label>
-                    <input
-                      className="w-full px-md py-sm bg-surface border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 outline-none text-on-surface"
-                      id="password"
-                      placeholder="••••••••"
-                      type="password"
-                    />
+                    <div className="relative">
+                      <input
+                        className="w-full pl-md pr-12 py-sm bg-surface border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200 outline-none text-on-surface"
+                        id="password"
+                        placeholder="••••••••"
+                        type={showPassword ? "text" : "password"}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors focus:outline-none"
+                      >
+                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center justify-between px-xs">

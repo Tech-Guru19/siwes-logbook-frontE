@@ -1,9 +1,10 @@
 import axios from "axios";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Mail, Lock, Home, KeyRound, CheckCircle2, RefreshCw } from "lucide-react";
+import { ArrowLeft, Mail, Lock, Home, KeyRound, CheckCircle2, RefreshCw, Eye, EyeOff } from 'lucide-react';
 
 const Signup = () => {
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const [personalEmail, setPersonalEmail] = useState("");
   const [institutionEmail, setInstitutionEmail] = useState("");
@@ -86,19 +87,19 @@ const Signup = () => {
     <div className="min-h-screen bg-[#FDFDFB] flex font-sans text-slate-600 selection:bg-primary/20">
 
       {/* Left Side: Form Area */}
-      <div className="w-full lg:w-1/2 flex flex-col relative px-6 md:px-16 py-12 h-screen overflow-y-auto custom-scrollbar">
-        <Link to="/register/accountType" className="absolute top-8 left-6 md:left-12 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-slate-400 hover:text-primary transition-colors duration-300">
+      <div className="w-full lg:w-1/2 flex flex-col relative px-4 sm:px-6 md:px-16 py-8 md:py-12 h-screen overflow-y-auto custom-scrollbar">
+        <Link to="/register/accountType" className="absolute top-6 md:top-8 left-4 sm:left-6 md:left-12 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-slate-400 hover:text-primary transition-colors duration-300">
           <ArrowLeft className="w-4 h-4" /> Back to Gateway
         </Link>
-        <div className="flex-1 flex flex-col justify-center max-w-md w-full mx-auto mt-20 lg:mt-10 mb-10">
+        <div className="flex-1 flex flex-col justify-center max-w-md w-full mx-auto mt-16 sm:mt-20 lg:mt-10 mb-6 sm:mb-10">
           <div className="mb-10">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 flex items-center justify-center">
+            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center">
                 <img src="/logo.png" alt="SIWES Logo" className="w-full h-full object-contain" />
               </div>
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Student Activation</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-serif text-primary mb-4 leading-tight">Join the ecosystem.</h1>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif text-primary mb-2 sm:mb-4 leading-tight">Join the ecosystem.</h1>
             <p className="text-slate-500 font-light leading-relaxed">
               Activate your pre-registered student profile to start recording daily work logs and submit assessments.
             </p>
@@ -107,7 +108,7 @@ const Signup = () => {
           <form onSubmit={signUp} className="space-y-6">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Personal Email Address *</label>
-              <div className="relative flex gap-3">
+              <div className="relative flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" strokeWidth={1.5} />
                   <input
@@ -140,7 +141,7 @@ const Signup = () => {
             {isOtpSent && !isOtpVerified && (
               <div className="p-5 bg-slate-50 border border-slate-100 rounded-2xl animate-in fade-in slide-in-from-top-2">
                 <label className="block text-xs font-semibold uppercase tracking-widest text-primary mb-2">Verification Code *</label>
-                <div className="relative flex gap-3">
+                <div className="relative flex flex-col sm:flex-row gap-3">
                   <div className="relative flex-1">
                     <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" strokeWidth={1.5} />
                     <input
@@ -200,13 +201,20 @@ const Signup = () => {
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" strokeWidth={1.5} />
                 <input
-                  className="w-full h-14 pl-12 pr-4 bg-white border border-slate-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none text-sm font-medium transition-all"
+                  className="w-full h-14 pl-12 pr-12 bg-white border border-slate-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none text-sm font-medium transition-all"
                   placeholder="••••••••"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors focus:outline-none"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
               </div>
             </div>
 

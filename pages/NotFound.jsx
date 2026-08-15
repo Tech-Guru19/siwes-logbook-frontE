@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Compass, Home, ArrowLeft } from 'lucide-react';
+import { Compass, Home, ArrowLeft } from "lucide-react";
 
 const NotFound = () => {
   const navigate = useNavigate();

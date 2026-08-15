@@ -67,7 +67,7 @@ const OtpVerification = () => {
           <div className="max-w-[480px] w-full">
             <div className="bg-white border border-slate-100 p-10 lg:p-12 rounded-[2rem] shadow-[0_20px_50px_rgba(0,32,69,0.03)] animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="flex flex-col items-center mb-10">
-                <div className="w-16 h-16 flex items-center justify-center mb-6 shadow-sm">
+                <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center mb-4 md:mb-6 shadow-sm">
                   <img src="/logo.png" alt="SIWES Logo" className="w-full h-full object-contain" />
                 </div>
                 <h1 className="font-serif font-bold text-3xl text-slate-900 mb-3 text-center">

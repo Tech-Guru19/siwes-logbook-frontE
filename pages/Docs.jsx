@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, ShieldCheck, HelpCircle, FileText, ChevronRight, Menu, X, ArrowLeft } from 'lucide-react';
+import { BookOpen, ShieldCheck, HelpCircle, FileText, ChevronRight, Menu, X, ArrowLeft } from "lucide-react";
 
 const Docs = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

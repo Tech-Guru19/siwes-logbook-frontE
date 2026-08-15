@@ -8,7 +8,7 @@ import {
     ArrowLeft, Sparkles, Phone, MapPin, Landmark, FileText, 
     ExternalLink, TrendingUp, History, CalendarOff, CheckCircle2, 
     XCircle, ClipboardCheck, MessageSquare, Clock, Image as ImageIcon,
-    Building2, Mail, Users
+    Building2, Mail, Users, Star
 } from 'lucide-react'
 import { useDialog } from '../../src/context/DialogContext'
 

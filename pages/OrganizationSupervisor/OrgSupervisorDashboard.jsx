@@ -3,14 +3,11 @@ import { context } from '../../src/App'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import user from '../../public/profile.png'
-import { 
-  BadgeInfo, LogOut, Edit3, Users, CalendarOff, 
-  BadgeCheck, UserCheck, FileSignature, X, Star, 
-  MessageSquare, CheckCircle2, GraduationCap, Building2, MapPin, Mail, Phone, BookOpen, Clock 
-} from 'lucide-react'
+import { BadgeInfo, LogOut, Edit3, Users, CalendarOff, BadgeCheck, UserCheck, FileSignature, X, Star, MessageSquare, CheckCircle2, GraduationCap, Building2, MapPin, Mail, Phone, BookOpen, Clock, Menu } from 'lucide-react'
 import { useDialog } from '../../src/context/DialogContext'
 
 const OrgSupervisorDashboard = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const navigate = useNavigate()
     const { organizationSupervisorCred } = useContext(context)
     const { showAlert, showConfirm } = useDialog()
@@ -108,8 +105,12 @@ const OrgSupervisorDashboard = () => {
         <div className="flex bg-[#FDFDFB] min-h-screen font-sans selection:bg-primary/20 text-slate-600">
             
             {/* Premium Sidebar */}
-            <aside className="h-screen w-72 border-r border-slate-100 fixed left-0 top-0 bg-white flex flex-col py-8 z-40 shadow-[4px_0_24px_rgba(0,32,69,0.02)] hidden lg:flex">
+            {mobileMenuOpen && <div className="fixed inset-0 bg-slate-900/20 z-40 lg:hidden backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}></div>}
+        <aside className={`h-screen w-72 border-r border-slate-100 fixed left-0 top-0 bg-white flex flex-col py-8 z-50 shadow-[4px_0_24px_rgba(0,32,69,0.02)] transition-transform duration-300 lg:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <Logo size="md" className="px-8 mb-12" subtitle="Industry Supervisor" />
+        <button onClick={() => setMobileMenuOpen(false)} className="lg:hidden absolute top-8 right-6 p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors">
+          <X className="w-5 h-5" />
+        </button>
 
                 <nav className="flex-grow flex flex-col px-4 gap-2">
                     <button 
@@ -165,7 +166,19 @@ const OrgSupervisorDashboard = () => {
             </aside>
 
             {/* Main Content */}
-            <main className="lg:ml-72 flex-1 p-6 lg:p-12 xl:p-16 pt-4 lg:pt-8 xl:pt-8 space-y-12">
+            <main className="lg:ml-72 flex-1 p-4 sm:p-6 lg:p-12 xl:p-16 pt-4 lg:pt-8 xl:pt-8 space-y-8 sm:space-y-12 w-full overflow-x-hidden">
+        {/* Mobile Header */}
+        <div className="lg:hidden flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-6 sticky top-4 z-30">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10">
+              <img src="/logo.png" alt="SIWES Logo" className="w-full h-full object-contain" />
+            </div>
+            <span className="font-serif font-bold text-primary">SIWES Logbook</span>
+          </div>
+          <button onClick={() => setMobileMenuOpen(true)} className="p-2 text-primary focus:outline-none bg-primary/5 rounded-xl hover:bg-primary/10 transition-colors">
+            <Menu className="w-6 h-6" />
+          </button>
+        </div>
                 
                 {/* Header Banner */}
                 <div className="bg-white p-8 lg:p-10 rounded-[2.5rem] border border-slate-100 shadow-[0_20px_50px_rgba(0,32,69,0.03)] flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Bell, HelpCircle, UserCircle, Info, ShieldCheck, Send } from 'lucide-react';
+import { Search, Bell, HelpCircle, UserCircle, Info, ShieldCheck, Send } from "lucide-react";
 
 const SupervisionAcctRequest = () => {
   return (

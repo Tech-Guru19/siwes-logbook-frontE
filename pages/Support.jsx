@@ -1,15 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { 
-  ArrowLeft,
-  Search, 
-  HelpCircle, 
-  Send,
-  AlertCircle,
-  BookOpen,
-  LifeBuoy
-} from 'lucide-react';
+import { ArrowLeft, Search, HelpCircle, Send, AlertCircle, BookOpen, LifeBuoy } from "lucide-react";
 import { context } from '../src/App';
 
 const Support = () => {

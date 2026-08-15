@@ -1,16 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-    BookOpen, 
-    ChevronLeft, 
-    ArrowRight,
-    GraduationCap,
-    Building2,
-    ShieldCheck,
-    Users,
-    BadgeCheck
-} from 'lucide-react';
+import { BookOpen, ChevronLeft, ArrowRight, GraduationCap, Building2, ShieldCheck, Users, BadgeCheck } from "lucide-react";
 
 const fadeUpVariants = {
     hidden: { opacity: 0, y: 30 },
@@ -37,11 +28,11 @@ const AccountType = () => {
                         <div className="w-14 h-14 flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
                             <img src="/logo.png" alt="SIWES Logo" className="w-full h-full object-contain" />
                         </div>
-                        <span className="text-xl font-serif font-medium tracking-tight text-primary">
+                        <span className="hidden sm:block text-xl font-serif font-medium tracking-tight text-primary">
                             SIWES Logbook.
                         </span>
                     </Link>
-                    <Link to="/" className="text-xs uppercase tracking-[0.2em] font-medium text-slate-400 hover:text-primary transition-colors duration-500">
+                    <Link to="/" className="text-[10px] sm:text-xs uppercase tracking-[0.2em] font-medium text-slate-400 hover:text-primary transition-colors duration-500 text-right max-w-[100px] sm:max-w-none leading-tight">
                         Back to Home
                     </Link>
                 </nav>
@@ -118,14 +109,14 @@ const AccountType = () => {
                             exit="exit"
                             className="w-full flex flex-col items-center max-w-5xl"
                         >
-                            <motion.div variants={fadeUpVariants} className="w-full text-center mb-16 relative">
+                            <motion.div variants={fadeUpVariants} className="w-full text-center mb-10 md:mb-16 relative flex flex-col md:flex-row md:items-center md:justify-center">
                                 <button 
                                     onClick={() => setShowAdminMenu(false)}
-                                    className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-2 text-sm font-medium uppercase tracking-widest text-slate-400 hover:text-primary transition-colors duration-300"
+                                    className="self-start md:absolute md:left-0 md:top-1/2 md:-translate-y-1/2 flex items-center gap-2 text-sm font-medium uppercase tracking-widest text-slate-400 hover:text-primary transition-colors duration-300 mb-6 md:mb-0"
                                 >
                                     <ChevronLeft className="w-4 h-4" /> Back
                                 </button>
-                                <h2 className="text-4xl font-serif text-primary inline-block">Staff & Administration</h2>
+                                <h2 className="text-3xl sm:text-4xl font-serif text-primary">Staff & Administration</h2>
                             </motion.div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">

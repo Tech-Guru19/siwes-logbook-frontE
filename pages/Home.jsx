@@ -1,23 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
-import { 
-  ArrowRight,
-  Heart,
-  Users,
-  PenTool,
-  MessageCircle,
-  Coffee,
-  BookOpen,
-  CheckCircle2,
-  XCircle,
-  ShieldCheck,
-  Briefcase,
-  Cloud,
-  Code,
-  Menu,
-  X
-} from "lucide-react";
+import { ArrowRight, Heart, Users, PenTool, MessageCircle, Coffee, BookOpen, CheckCircle2, XCircle, ShieldCheck, Briefcase, Cloud, Code, Menu, X } from "lucide-react";
 
 // Ultra-smooth animation variants
 const revealUp = {

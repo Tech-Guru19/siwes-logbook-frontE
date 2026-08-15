@@ -2,10 +2,11 @@ import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { context } from '../../src/App'
-import { ArrowLeft, Mail, Lock, LogIn } from 'lucide-react'
+import { ArrowLeft, Mail, Lock, LogIn, Eye, EyeOff } from 'lucide-react';
 import { useDialog } from '../../src/context/DialogContext'
 
 const SchoolSignin = () => {
+  const [showPassword, setShowPassword] = useState(false);
     const { setSchoolCred } = useContext(context)
     const navigate = useNavigate()
     const { showAlert } = useDialog()
@@ -77,13 +78,20 @@ const SchoolSignin = () => {
                             <div className="relative">
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" strokeWidth={1.5} />
                                 <input
-                                    className="w-full h-14 pl-12 pr-4 bg-white border border-slate-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none text-sm font-medium transition-all"
+                                    className="w-full h-14 pl-12 pr-12 bg-white border border-slate-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none text-sm font-medium transition-all"
                                     placeholder="••••••••"
-                                    type="password"
+                                    type={showPassword ? "text" : "password"}
                                     required
                                     value={password}
                                     onChange={(e) => setpassword(e.target.value)}
                                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors focus:outline-none"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
                             </div>
                         </div>
 

@@ -4,14 +4,11 @@ import { context } from '../../src/App'
 import Logo from '../../src/components/Logo'
 import user from '../../public/profile.png'
 import axios from 'axios'
-import { 
-    Building2, LayoutDashboard, GraduationCap, Users, 
-    Building, LogOut, ChevronRight, UserPlus, 
-    Edit3, Trash2, Filter, Download 
-} from 'lucide-react'
+import { Building2, LayoutDashboard, GraduationCap, Users, Building, LogOut, ChevronRight, UserPlus, Edit3, Trash2, Filter, Download, Menu, X } from 'lucide-react'
 import { useDialog } from '../../src/context/DialogContext'
 
 const SchoolStudentDashboard = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const { showAlert, showConfirm } = useDialog()
     const { schoolCred, setSchoolCred, studentList, setStudentList, schoolDepartments } = useContext(context)
     const navigate = useNavigate()
@@ -167,8 +164,12 @@ const SchoolStudentDashboard = () => {
     return (
         <div className="flex bg-[#FDFDFB] min-h-screen font-sans selection:bg-primary/20 text-slate-600">
             {/* Premium Sidebar */}
-            <aside className="h-screen w-72 border-r border-slate-100 fixed left-0 top-0 bg-white flex flex-col py-8 z-40 shadow-[4px_0_24px_rgba(0,32,69,0.02)] hidden lg:flex">
+            {mobileMenuOpen && <div className="fixed inset-0 bg-slate-900/20 z-40 lg:hidden backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}></div>}
+        <aside className={`h-screen w-72 border-r border-slate-100 fixed left-0 top-0 bg-white flex flex-col py-8 z-50 shadow-[4px_0_24px_rgba(0,32,69,0.02)] transition-transform duration-300 lg:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <Logo size="md" className="px-8 mb-12" title={schoolCred?.Name || 'Institution'} subtitle="SIWES Portal" />
+        <button onClick={() => setMobileMenuOpen(false)} className="lg:hidden absolute top-8 right-6 p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors">
+          <X className="w-5 h-5" />
+        </button>
 
                 <nav className="flex-grow flex flex-col px-4 gap-2 overflow-y-auto custom-scrollbar">
                     <Link to="/school/dashboard" className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm transition-all text-left text-slate-500 font-medium hover:bg-primary/5 hover:text-primary">
@@ -199,7 +200,19 @@ const SchoolStudentDashboard = () => {
             </aside>
 
             {/* Main Content */}
-            <main className="lg:ml-72 flex-1 p-6 lg:p-12 xl:p-16 pt-4 lg:pt-8 xl:pt-8 space-y-12">
+            <main className="lg:ml-72 flex-1 p-4 sm:p-6 lg:p-12 xl:p-16 pt-4 lg:pt-8 xl:pt-8 space-y-8 sm:space-y-12 w-full overflow-x-hidden">
+        {/* Mobile Header */}
+        <div className="lg:hidden flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-slate-100 mb-6 sticky top-4 z-30">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10">
+              <img src="/logo.png" alt="SIWES Logo" className="w-full h-full object-contain" />
+            </div>
+            <span className="font-serif font-bold text-primary">SIWES Logbook</span>
+          </div>
+          <button onClick={() => setMobileMenuOpen(true)} className="p-2 text-primary focus:outline-none bg-primary/5 rounded-xl hover:bg-primary/10 transition-colors">
+            <Menu className="w-6 h-6" />
+          </button>
+        </div>
                 
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-slate-100 pb-6">
