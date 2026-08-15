@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { context } from '../../src/App'
+import Logo from '../../src/components/Logo'
 import user from '../../public/profile.png'
 import axios from 'axios'
 import { 
@@ -8,8 +9,10 @@ import {
     Building, LogOut, ChevronRight, UserPlus, 
     Edit3, Trash2, Filter, Download 
 } from 'lucide-react'
+import { useDialog } from '../../src/context/DialogContext'
 
 const SchoolStudentDashboard = () => {
+    const { showAlert, showConfirm } = useDialog()
     const { schoolCred, setSchoolCred, studentList, setStudentList, schoolDepartments } = useContext(context)
     const navigate = useNavigate()
     const [fullName, setFullName] = useState("")
@@ -28,7 +31,7 @@ const SchoolStudentDashboard = () => {
     }
 
     useEffect(() => {
-        if (!schoolCred) return navigate("/")
+        if (!schoolCred) return navigate("/register/accountType")
 
         axios.post("https://siwes-logbook-backend.onrender.com/school/fetch/supervisor", { id: schoolCred?.id })
             .then((res) => {
@@ -57,7 +60,7 @@ const SchoolStudentDashboard = () => {
 
     const handleSubmitStudent = () => {
         if (!fullName || !emailAdress || !supervisorId || !matricNo || !department || !startDate || !endDate) {
-            return alert("Please fill in all parameters")
+            return showAlert("Please fill in all parameters")
         }
 
         if (isEditing) {
@@ -81,10 +84,10 @@ const SchoolStudentDashboard = () => {
                     End_Date: endDate
                 } : s))
                 resetForm()
-                alert("Student updated successfully")
+                showAlert("Student updated successfully")
             })
             .catch((err) => {
-                alert(err?.response?.data?.message || "Error updating student")
+                showAlert(err?.response?.data?.message || "Error updating student")
             })
         } else {
             axios.post("https://siwes-logbook-backend.onrender.com/school/register/student", {
@@ -111,10 +114,10 @@ const SchoolStudentDashboard = () => {
                     School_Supervisor_Id: supervisorId
                 }])
                 resetForm()
-                alert("Student enrolled successfully")
+                showAlert("Student enrolled successfully")
             })
             .catch((err) => {
-                alert(err?.response?.data?.message || "Error enrolling student")
+                showAlert(err?.response?.data?.message || "Error enrolling student")
             })
         }
     }
@@ -148,15 +151,16 @@ const SchoolStudentDashboard = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
-    const handleDeleteClick = (id) => {
-        if (!window.confirm("Are you sure you want to delete this student?")) return
+    const handleDeleteClick = async (id) => {
+        const confirm = await showConfirm("Are you sure you want to delete this student?")
+        if (!confirm) return
         axios.post("https://siwes-logbook-backend.onrender.com/school/student/delete", { id })
             .then(() => {
                 setStudentList(prev => prev.filter(s => s.id !== id))
-                alert("Student deleted successfully")
+                showAlert("Student deleted successfully")
             })
             .catch((err) => {
-                alert(err?.response?.data?.message || "Error deleting student")
+                showAlert(err?.response?.data?.message || "Error deleting student")
             })
     }
 
@@ -164,15 +168,7 @@ const SchoolStudentDashboard = () => {
         <div className="flex bg-[#FDFDFB] min-h-screen font-sans selection:bg-primary/20 text-slate-600">
             {/* Premium Sidebar */}
             <aside className="h-screen w-72 border-r border-slate-100 fixed left-0 top-0 bg-white flex flex-col py-8 z-40 shadow-[4px_0_24px_rgba(0,32,69,0.02)] hidden lg:flex">
-                <div className="px-8 mb-12 flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-                        <Building2 className="text-white w-5 h-5" />
-                    </div>
-                    <div>
-                        <h1 className="text-lg font-serif font-bold text-primary tracking-tight truncate max-w-[150px]">{schoolCred?.Name || 'Institution'}</h1>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">SIWES Portal</p>
-                    </div>
-                </div>
+                <Logo size="md" className="px-8 mb-12" title={schoolCred?.Name || 'Institution'} subtitle="SIWES Portal" />
 
                 <nav className="flex-grow flex flex-col px-4 gap-2 overflow-y-auto custom-scrollbar">
                     <Link to="/school/dashboard" className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm transition-all text-left text-slate-500 font-medium hover:bg-primary/5 hover:text-primary">
@@ -203,7 +199,7 @@ const SchoolStudentDashboard = () => {
             </aside>
 
             {/* Main Content */}
-            <main className="lg:ml-72 flex-1 p-6 lg:p-12 xl:p-16 space-y-12 max-w-[1400px]">
+            <main className="lg:ml-72 flex-1 p-6 lg:p-12 xl:p-16 pt-4 lg:pt-8 xl:pt-8 space-y-12">
                 
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-slate-100 pb-6">

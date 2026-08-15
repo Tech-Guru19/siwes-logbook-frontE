@@ -8,10 +8,12 @@ import {
   BadgeCheck, UserCheck, FileSignature, X, Star, 
   MessageSquare, CheckCircle2, GraduationCap, Building2, MapPin, Mail, Phone, BookOpen, Clock 
 } from 'lucide-react'
+import { useDialog } from '../../src/context/DialogContext'
 
 const OrgSupervisorDashboard = () => {
     const navigate = useNavigate()
     const { organizationSupervisorCred } = useContext(context)
+    const { showAlert, showConfirm } = useDialog()
     const [logbooks, setLogbooks] = useState([])
     const [assignedStudents, setAssignedStudents] = useState([])
     const [selectedLog, setSelectedLog] = useState(null)
@@ -25,7 +27,7 @@ const OrgSupervisorDashboard = () => {
 
     useEffect(() => {
         if (!organizationSupervisorCred) {
-            navigate('/organization-supervisor/signin')
+            navigate('/register/accountType')
             return
         }
         fetchInternLogbooks()
@@ -75,30 +77,30 @@ const OrgSupervisorDashboard = () => {
             org_supervisor_rating: rating
         })
         .then(() => {
-            alert('Logbook entry signed off successfully!')
+            showAlert('Logbook entry signed off successfully!')
             setSelectedLog(null)
             setComment('')
             setRating(0)
             fetchInternLogbooks()
         })
         .catch((err) => {
-            alert(err?.response?.data?.message || 'Sign-off failed.')
+            showAlert(err?.response?.data?.message || 'Sign-off failed.')
         })
     }
 
     const handleLeaveAction = async (leave_id, status) => {
-        if (!confirm(`Are you sure you want to ${status} this leave request?`)) return;
+        if (!(await showConfirm(`Are you sure you want to ${status} this leave request?`))) return;
         try {
             await axios.post('https://siwes-logbook-backend.onrender.com/leave/update-status', {
                 leave_id,
                 status,
                 org_supervisor_id: organizationSupervisorCred.id
             });
-            alert(`Leave request ${status} successfully.`);
+            showAlert(`Leave request ${status} successfully.`);
             fetchAllLeaves();
         } catch (error) {
             console.error(error);
-            alert(error?.response?.data?.message || "Failed to update leave request");
+            showAlert(error?.response?.data?.message || "Failed to update leave request");
         }
     }
 
@@ -107,15 +109,7 @@ const OrgSupervisorDashboard = () => {
             
             {/* Premium Sidebar */}
             <aside className="h-screen w-72 border-r border-slate-100 fixed left-0 top-0 bg-white flex flex-col py-8 z-40 shadow-[4px_0_24px_rgba(0,32,69,0.02)] hidden lg:flex">
-                <div className="px-8 mb-12 flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-                        <BadgeInfo className="text-white w-5 h-5" />
-                    </div>
-                    <div>
-                        <h1 className="text-lg font-serif font-bold text-primary tracking-tight">SIWES Portal</h1>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Industry Supervisor</p>
-                    </div>
-                </div>
+                <Logo size="md" className="px-8 mb-12" subtitle="Industry Supervisor" />
 
                 <nav className="flex-grow flex flex-col px-4 gap-2">
                     <button 
@@ -171,7 +165,7 @@ const OrgSupervisorDashboard = () => {
             </aside>
 
             {/* Main Content */}
-            <main className="lg:ml-72 flex-1 p-6 lg:p-12 xl:p-16 space-y-12 max-w-[1400px]">
+            <main className="lg:ml-72 flex-1 p-6 lg:p-12 xl:p-16 pt-4 lg:pt-8 xl:pt-8 space-y-12">
                 
                 {/* Header Banner */}
                 <div className="bg-white p-8 lg:p-10 rounded-[2.5rem] border border-slate-100 shadow-[0_20px_50px_rgba(0,32,69,0.03)] flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">

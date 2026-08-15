@@ -84,22 +84,26 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen bg-[#FDFDFB] flex font-sans text-slate-600 selection:bg-primary/20">
-      
+
       {/* Left Side: Form Area */}
       <div className="w-full lg:w-1/2 flex flex-col relative px-6 md:px-16 py-12 h-screen overflow-y-auto custom-scrollbar">
         <Link to="/register/accountType" className="absolute top-8 left-6 md:left-12 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-slate-400 hover:text-primary transition-colors duration-300">
           <ArrowLeft className="w-4 h-4" /> Back to Gateway
         </Link>
-
         <div className="flex-1 flex flex-col justify-center max-w-md w-full mx-auto mt-20 lg:mt-10 mb-10">
           <div className="mb-10">
-            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary-fixed-dim mb-4 block">Student Activation</span>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 flex items-center justify-center">
+                <img src="/logo.png" alt="SIWES Logo" className="w-full h-full object-contain" />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Student Activation</span>
+            </div>
             <h1 className="text-4xl md:text-5xl font-serif text-primary mb-4 leading-tight">Join the ecosystem.</h1>
             <p className="text-slate-500 font-light leading-relaxed">
               Activate your pre-registered student profile to start recording daily work logs and submit assessments.
             </p>
           </div>
-          
+
           <form onSubmit={signUp} className="space-y-6">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Personal Email Address *</label>
@@ -126,7 +130,7 @@ const Signup = () => {
                     disabled={otpLoading || !personalEmail}
                     className="h-14 px-6 bg-primary/5 text-primary border border-primary/10 hover:bg-primary hover:text-white font-semibold uppercase tracking-widest text-xs rounded-xl transition-all duration-300 disabled:opacity-50 whitespace-nowrap flex items-center gap-2"
                   >
-                    {otpLoading ? <RefreshCw className="w-4 h-4 animate-spin"/> : null}
+                    {otpLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : null}
                     {isOtpSent ? "Resend" : "Get OTP"}
                   </button>
                 )}
@@ -154,7 +158,7 @@ const Signup = () => {
                     disabled={otpLoading || !otpCode}
                     className="h-14 px-8 bg-primary text-white font-semibold uppercase tracking-widest text-xs rounded-xl hover:bg-[#001530] transition-colors duration-300 disabled:opacity-50 flex items-center gap-2"
                   >
-                    {otpLoading ? <RefreshCw className="w-4 h-4 animate-spin"/> : null}
+                    {otpLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : null}
                     Verify
                   </button>
                 </div>
@@ -230,19 +234,19 @@ const Signup = () => {
       <div className="hidden lg:block lg:w-1/2 relative bg-[#001530] overflow-hidden">
         {/* Glow Effects */}
         <div className="absolute top-0 left-0 w-[800px] h-[800px] bg-secondary-fixed-dim/20 rounded-full blur-[150px] mix-blend-screen pointer-events-none"></div>
-        
-        <img 
-          src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&q=80&w=1200" 
-          alt="Student typing" 
-          className="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-overlay" 
+
+        <img
+          src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&q=80&w=1200"
+          alt="Student typing"
+          className="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-overlay"
         />
-        
+
         <div className="absolute inset-0 bg-gradient-to-t from-[#001530] via-transparent to-transparent"></div>
-        
+
         <div className="absolute bottom-24 left-16 right-16">
           <div className="w-12 h-[2px] bg-secondary-fixed-dim mb-8"></div>
           <h2 className="text-5xl font-serif text-white leading-tight mb-6">
-            "Education is not <br/>the learning of facts, <br/><span className="italic font-light text-slate-300">but the training of the mind.</span>"
+            "Education is not <br />the learning of facts, <br /><span className="italic font-light text-slate-300">but the training of the mind.</span>"
           </h2>
           <p className="text-slate-400 font-light text-lg uppercase tracking-widest text-xs">Albert Einstein</p>
         </div>

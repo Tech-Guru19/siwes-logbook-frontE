@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+import Logo from '../src/components/Logo';
 import { Link, useNavigate } from "react-router-dom";
 import { context } from "../src/App";
 import axios from "axios";
@@ -12,9 +13,11 @@ import {
   BookOpen, CheckCircle, Building, MapPin, Mail, UserPlus, 
   TrendingUp, Landmark, UploadCloud, CalendarOff, X, Search 
 } from "lucide-react";
+import { useDialog } from "../src/context/DialogContext";
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
+  const { showAlert } = useDialog();
   const { studentCred } = useContext(context);
   const [showPlacementModal, setShowPlacementModal] = useState(false);
   const [organizations, setOrganizations] = useState([]);
@@ -79,7 +82,7 @@ const StudentDashboard = () => {
 
   useEffect(() => {
     if (!studentCred) {
-      navigate("/signin");
+      navigate("/register/accountType");
       return;
     }
     fetchLogs();
@@ -135,35 +138,27 @@ const StudentDashboard = () => {
 
   const handleApplyPlacement = (e) => {
     e.preventDefault();
-    if (!selectedOrg) return alert("Please select a company to apply");
+    if (!selectedOrg) return showAlert("Please select a company to apply");
 
     axios.post("https://siwes-logbook-backend.onrender.com/user/student/placement/apply", {
       student_id: studentCred?.id,
       organization_id: selectedOrg.id
     })
     .then(() => {
-      alert("Placement application submitted successfully!");
+      showAlert("Placement application submitted successfully!");
       setShowPlacementModal(false);
       setSelectedOrg(null);
       setSearchQuery("");
       fetchPlacements();
     })
-    .catch((err) => alert(err?.response?.data?.message || "Error submitting application"));
+    .catch((err) => showAlert(err?.response?.data?.message || "Error submitting application"));
   };
 
   return (
     <div className="flex bg-[#FDFDFB] min-h-screen font-sans selection:bg-primary/20 text-slate-600">
       {/* Premium Sidebar */}
       <aside className="h-screen w-72 border-r border-slate-100 fixed left-0 top-0 bg-white flex flex-col py-8 z-40 shadow-[4px_0_24px_rgba(0,32,69,0.02)] hidden lg:flex">
-        <div className="px-8 mb-12 flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-            <BookOpen className="text-white w-5 h-5" />
-          </div>
-          <div>
-            <h1 className="text-lg font-serif font-bold text-primary tracking-tight">SIWES Portal</h1>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Student Dash</p>
-          </div>
-        </div>
+        <Logo size="md" className="px-8 mb-12" subtitle="Student Dash" />
 
         <nav className="flex-grow flex flex-col px-4 gap-2">
           <Link
@@ -205,7 +200,7 @@ const StudentDashboard = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="lg:ml-72 flex-1 p-6 lg:p-12 xl:p-16 space-y-12 max-w-[1400px]">
+      <main className="lg:ml-72 flex-1 p-6 lg:p-12 xl:p-16 pt-4 lg:pt-8 xl:pt-8 space-y-12">
         
         {/* Header */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">

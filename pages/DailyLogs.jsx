@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+import Logo from '../src/components/Logo';
 import { Link, useNavigate } from "react-router-dom";
 import { context } from "../src/App";
 import axios from "axios";
@@ -8,9 +9,11 @@ import {
   AlertTriangle, Edit2, PlusCircle, UploadCloud, Trash2, 
   RefreshCw, Save, Send, History, Image as ImageIcon, CheckCircle, CalendarDays 
 } from "lucide-react";
+import { useDialog } from "../src/context/DialogContext";
 
 const DailyLogs = () => {
   const navigate = useNavigate();
+  const { showAlert, showConfirm } = useDialog();
   const { studentCred } = useContext(context);
   const [logs, setLogs] = useState([]);
   
@@ -28,7 +31,7 @@ const DailyLogs = () => {
   const handleImageSelect = (file) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      return alert("Please select an image file.");
+      return showAlert("Please select an image file.");
     }
     setSelectedFile(file);
     const reader = new FileReader();
@@ -91,7 +94,7 @@ const DailyLogs = () => {
 
   useEffect(() => {
     if (!studentCred) {
-      navigate("/signin");
+      navigate("/register/accountType");
       return;
     }
     axios.post("https://siwes-logbook-backend.onrender.com/user/student/profile", { id: studentCred?.id })
@@ -115,26 +118,26 @@ const DailyLogs = () => {
 
   const handleSubmitLog = async (e) => {
     e.preventDefault();
-    if (!entryDate || !activityDescription) return alert("Please fill in entry date and description");
+    if (!entryDate || !activityDescription) return showAlert("Please fill in entry date and description");
 
     const dateExists = logs.some(log => {
       if (isEditing && log.id === editingLogId) return false;
       return new Date(log.date).toISOString().split('T')[0] === entryDate;
     });
     if (dateExists) {
-      return alert("You have already recorded a logbook entry for this date.");
+      return showAlert("You have already recorded a logbook entry for this date.");
     }
 
     const selectedTime = new Date(entryDate).setHours(0,0,0,0);
     const todayTime = new Date().setHours(0,0,0,0);
     if (selectedTime > todayTime) {
-      return alert("Cannot record a logbook entry for a future date.");
+      return showAlert("Cannot record a logbook entry for a future date.");
     }
 
     if (profile?.End_Date) {
       const endTime = new Date(profile.End_Date).setHours(0,0,0,0);
       if (selectedTime > endTime) {
-        return alert("Cannot record a logbook entry after your SIWES end date.");
+        return showAlert("Cannot record a logbook entry after your SIWES end date.");
       }
     }
 
@@ -150,7 +153,7 @@ const DailyLogs = () => {
         });
         const secureUrl = await uploadImg(base64);
         if (!secureUrl) {
-          alert("Image upload failed. Please try again.");
+          showAlert("Image upload failed. Please try again.");
           setUploading(false);
           return;
         }
@@ -163,7 +166,7 @@ const DailyLogs = () => {
           activity_description: activityDescription,
           image_attachment: uploadedUrl || null
         });
-        alert("Log entry updated successfully!");
+        showAlert("Log entry updated successfully!");
         resetForm();
         fetchLogs();
       } else {
@@ -174,12 +177,12 @@ const DailyLogs = () => {
           activity_description: activityDescription,
           image_attachment: uploadedUrl || null
         });
-        alert("Daily log entry recorded!");
+        showAlert("Daily log entry recorded!");
         resetForm();
         fetchLogs();
       }
     } catch (err) {
-      alert(err?.response?.data?.message || "Error submitting log entry");
+      showAlert(err?.response?.data?.message || "Error submitting log entry");
     } finally {
       setUploading(false);
     }
@@ -208,14 +211,15 @@ const DailyLogs = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDeleteClick = (id) => {
-    if (!window.confirm("Are you sure you want to delete this logbook entry?")) return;
+  const handleDeleteClick = async (id) => {
+    const confirm = await showConfirm("Are you sure you want to delete this logbook entry?");
+    if (!confirm) return;
     axios.post("https://siwes-logbook-backend.onrender.com/user/student/logbook/delete", { id })
       .then(() => {
-        alert("Log entry deleted");
+        showAlert("Log entry deleted");
         fetchLogs();
       })
-      .catch((err) => alert(err?.response?.data?.message || "Error deleting entry"));
+      .catch((err) => showAlert(err?.response?.data?.message || "Error deleting entry"));
   };
 
   return (
@@ -223,15 +227,7 @@ const DailyLogs = () => {
       
       {/* Premium Sidebar */}
       <aside className="h-screen w-72 border-r border-slate-100 fixed left-0 top-0 bg-white flex flex-col py-8 z-40 shadow-[4px_0_24px_rgba(0,32,69,0.02)] hidden lg:flex">
-        <div className="px-8 mb-12 flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-            <GraduationCap className="text-white w-5 h-5" />
-          </div>
-          <div>
-            <h1 className="text-lg font-serif font-bold text-primary tracking-tight">SIWES Portal</h1>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Student Dash</p>
-          </div>
-        </div>
+        <Logo size="md" className="px-8 mb-12" subtitle="Student Dash" />
 
         <nav className="flex-grow flex flex-col px-4 gap-2">
           <Link
@@ -262,7 +258,7 @@ const DailyLogs = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="lg:ml-72 flex-1 p-6 lg:p-12 xl:p-16 space-y-12 max-w-[1400px]">
+      <main className="lg:ml-72 flex-1 p-6 lg:p-12 xl:p-16 pt-4 lg:pt-8 xl:pt-8 space-y-12">
         
         {/* Header */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">

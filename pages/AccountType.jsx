@@ -34,8 +34,8 @@ const AccountType = () => {
             <header className="absolute top-0 left-0 w-full z-50 py-8">
                 <nav className="flex justify-between items-center px-6 md:px-12 max-w-7xl mx-auto">
                     <Link to="/" className="flex items-center gap-3 group">
-                        <div className="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center transition-all duration-700 group-hover:bg-primary group-hover:border-primary">
-                            <BookOpen className="text-primary w-4 h-4 transition-colors duration-700 group-hover:text-white" strokeWidth={1.5} />
+                        <div className="w-14 h-14 flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
+                            <img src="/logo.png" alt="SIWES Logo" className="w-full h-full object-contain" />
                         </div>
                         <span className="text-xl font-serif font-medium tracking-tight text-primary">
                             SIWES Logbook.

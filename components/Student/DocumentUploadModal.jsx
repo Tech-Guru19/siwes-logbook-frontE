@@ -2,15 +2,17 @@ import React, { useState } from "react";
 import axios from "axios";
 import { uploadImg } from "../../Cloudinary";
 import { UploadCloud, X, FileUp } from "lucide-react";
+import { useDialog } from "../../src/context/DialogContext";
 
 const DocumentUploadModal = ({ profile, onClose, onSuccess }) => {
+  const { showAlert } = useDialog();
   const [docType, setDocType] = useState("acceptance");
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!file) return alert("Please select a document");
+    if (!file) return showAlert("Please select a document");
     
     setLoading(true);
     try {
@@ -26,11 +28,11 @@ const DocumentUploadModal = ({ profile, onClose, onSuccess }) => {
 
             await axios.post("https://siwes-logbook-backend.onrender.com/user/student/update-details", payload);
             
-            alert("Document uploaded successfully!");
+            showAlert("Document uploaded successfully!");
             onSuccess();
         };
     } catch (err) {
-      alert(err?.response?.data?.message || "Failed to upload document");
+      showAlert(err?.response?.data?.message || "Failed to upload document");
       setLoading(false);
     }
   };

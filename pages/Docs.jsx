@@ -31,8 +31,8 @@ const Docs = () => {
       <header className="sticky top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
         <nav className="flex items-center justify-between px-6 lg:px-12 h-16 max-w-[1600px] mx-auto">
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded-full border border-primary/20 flex items-center justify-center transition-all duration-300 group-hover:bg-primary group-hover:border-primary">
-              <BookOpen className="text-primary w-4 h-4 transition-colors duration-300 group-hover:text-white" strokeWidth={1.5} />
+            <div className="w-12 h-12 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+              <img src="/logo.png" alt="SIWES Logo" className="w-full h-full object-contain" />
             </div>
             <span className="text-lg font-serif font-medium tracking-tight text-primary">
               SIWES Docs

@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { CalendarOff, X, Send } from "lucide-react";
+import { useDialog } from "../../src/context/DialogContext";
 
 const LeaveRequestModal = ({ profile, onClose, onSuccess }) => {
+  const { showAlert } = useDialog();
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [reason, setReason] = useState("");
@@ -10,7 +12,7 @@ const LeaveRequestModal = ({ profile, onClose, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!startDate || !endDate || !reason) return alert("Please fill all fields");
+    if (!startDate || !endDate || !reason) return showAlert("Please fill all fields");
     
     setLoading(true);
     try {
@@ -20,10 +22,10 @@ const LeaveRequestModal = ({ profile, onClose, onSuccess }) => {
         end_date: endDate,
         reason: reason
       });
-      alert("Leave request submitted successfully!");
+      showAlert("Leave request submitted successfully!");
       onSuccess();
     } catch (err) {
-      alert(err?.response?.data?.message || "Failed to submit leave request");
+      showAlert(err?.response?.data?.message || "Failed to submit leave request");
     } finally {
       setLoading(false);
     }

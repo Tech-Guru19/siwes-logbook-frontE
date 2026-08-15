@@ -3,9 +3,11 @@ import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { uploadImg } from '../../Cloudinary'
 import { context } from '../../src/App'
 import axios from 'axios'
+import { useDialog } from '../../src/context/DialogContext'
 
 const SchoolSignup2 = () => {
     const navigate = useNavigate()
+    const { showAlert } = useDialog()
     const location = useLocation()
     const { setSchoolCred } = useContext(context)
 
@@ -47,10 +49,10 @@ const SchoolSignup2 = () => {
     const signUp = async (e) => {
         e.preventDefault()
         if (!Contact_Adress || !Certificte) {
-            return alert("Please fill in every detail")
+            return showAlert("Please fill in every detail")
         }
         if (!cacUrl.current) {
-            return alert("Your institution CAC registration certificate image is required")
+            return showAlert("Your institution CAC registration certificate image is required")
         }
         setIsLoading(true)
         let profileLink = null;
@@ -61,7 +63,7 @@ const SchoolSignup2 = () => {
                 const resProfile = await uploadImg(profileUrl.current, 40)
                 if (resProfile?.error) {
                     setIsLoading(false)
-                    return alert("Profile image upload failed")
+                    return showAlert("Profile image upload failed")
                 }
                 profileLink = resProfile
             }
@@ -69,7 +71,7 @@ const SchoolSignup2 = () => {
             const resCac = await uploadImg(cacUrl.current)
             if (resCac?.error) {
                 setIsLoading(false)
-                return alert("CAC certificate upload failed")
+                return showAlert("CAC certificate upload failed")
             }
             cacLink = resCac
 
@@ -87,12 +89,12 @@ const SchoolSignup2 = () => {
 
             axios.post("https://siwes-logbook-backend.onrender.com/school/signup", payload)
                 .then((res) => {
-                    alert("Institution account registered successfully!")
+                    showAlert("Institution account registered successfully!")
                     setSchoolCred(payload)
                     navigate("/school/dashboard")
                 })
                 .catch((error) => {
-                    alert(error?.response?.data?.message || "Registration failed")
+                    showAlert(error?.response?.data?.message || "Registration failed")
                 })
                 .finally(() => setIsLoading(false))
         } catch (err) {

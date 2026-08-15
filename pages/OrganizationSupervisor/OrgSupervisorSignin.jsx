@@ -3,16 +3,18 @@ import { Link, useNavigate } from 'react-router-dom'
 import { context } from '../../src/App'
 import axios from 'axios'
 import { ArrowLeft, Mail, Lock, LogIn } from 'lucide-react'
+import { useDialog } from '../../src/context/DialogContext'
 
 const OrgSupervisorSignin = () => {
     const navigate = useNavigate()
+    const { showAlert } = useDialog()
     const { setOrganizationSupervisorCred } = useContext(context)
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
 
     const handleSignin = (e) => {
         e.preventDefault()
-        if (!email || !password) return alert('Please enter email and password')
+        if (!email || !password) return showAlert('Please enter email and password')
 
         axios.post('https://siwes-logbook-backend.onrender.com/organization-supervisor/signin', {
             email_address: email,
@@ -21,11 +23,11 @@ const OrgSupervisorSignin = () => {
         .then((res) => {
             const supervisorData = res?.data?.message
             setOrganizationSupervisorCred(supervisorData)
-            alert('Welcome, ' + (supervisorData?.Full_Name || 'Industry Supervisor'))
+            showAlert('Welcome, ' + (supervisorData?.Full_Name || 'Industry Supervisor'))
             navigate('/organization-supervisor/dashboard')
         })
         .catch((err) => {
-            alert(err?.response?.data?.message || 'Sign in failed. Verify your credentials.')
+            showAlert(err?.response?.data?.message || 'Sign in failed. Verify your credentials.')
         })
     }
 
@@ -40,7 +42,12 @@ const OrgSupervisorSignin = () => {
 
                 <div className="flex-1 flex flex-col justify-center max-w-md w-full mx-auto mt-16 lg:mt-0">
                     <div className="mb-10">
-                        <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary-fixed-dim mb-4 block">Industry Mentor</span>
+                        <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 flex items-center justify-center">
+                <img src="/logo.png" alt="SIWES Logo" className="w-full h-full object-contain" />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Industry Mentor</span>
+            </div>
                         <h1 className="text-4xl md:text-5xl font-serif text-primary mb-4 leading-tight">Supervisor Login.</h1>
                         <p className="text-slate-500 font-light leading-relaxed">
                             Access workplace intern logbooks, verify attendance, and submit weekly sign-offs.

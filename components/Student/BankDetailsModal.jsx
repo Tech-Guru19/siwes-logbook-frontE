@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Landmark, X, Save } from "lucide-react";
+import { useDialog } from "../../src/context/DialogContext";
 
 const BankDetailsModal = ({ profile, onClose, onSuccess }) => {
-  const [bankName, setBankName] = useState(profile?.bank_name || "");
+  const { showAlert } = useDialog();
+  const [bankName, setBankName] = useState(profile?.Bank_Name || "");
   const [accountNumber, setAccountNumber] = useState(profile?.account_number || "");
   const [accountName, setAccountName] = useState(profile?.account_name || "");
   const [loading, setLoading] = useState(false);
@@ -18,10 +20,10 @@ const BankDetailsModal = ({ profile, onClose, onSuccess }) => {
         account_number: accountNumber,
         account_name: accountName
       });
-      alert("Bank details updated successfully!");
+      showAlert("Bank details updated successfully!");
       onSuccess();
     } catch (err) {
-      alert(err?.response?.data?.message || "Failed to update details");
+      showAlert(err?.response?.data?.message || "Failed to update details");
     } finally {
       setLoading(false);
     }

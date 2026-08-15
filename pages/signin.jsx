@@ -3,16 +3,18 @@ import { Link, useNavigate } from "react-router-dom";
 import { context } from "../src/App";
 import axios from "axios";
 import { ArrowLeft, Mail, Lock, LogIn } from "lucide-react";
+import { useDialog } from "../src/context/DialogContext";
 
 const Signin = () => {
   const navigate = useNavigate();
+  const { showAlert } = useDialog();
   const { setStudentCred } = useContext(context);
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSignin = (e) => {
     e.preventDefault();
-    if (!emailAddress || !password) return alert("Please enter email address and password");
+    if (!emailAddress || !password) return showAlert("Please enter email address and password");
 
     axios.post("https://siwes-logbook-backend.onrender.com/user/student/signin", {
       email_address: emailAddress,
@@ -21,11 +23,11 @@ const Signin = () => {
     .then((res) => {
       const studentData = res?.data?.message;
       setStudentCred(studentData);
-      alert("Welcome back, " + (studentData?.Full_Name || "Student"));
+      showAlert("Welcome back, " + (studentData?.Full_Name || "Student"));
       navigate("/student-dashboard");
     })
     .catch((err) => {
-      alert(err?.response?.data?.message || "Sign in failed. Check your credentials.");
+      showAlert(err?.response?.data?.message || "Sign in failed. Check your credentials.");
     });
   };
 
@@ -40,7 +42,12 @@ const Signin = () => {
 
         <div className="flex-1 flex flex-col justify-center max-w-md w-full mx-auto mt-16 lg:mt-0">
           <div className="mb-10">
-            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary-fixed-dim mb-4 block">Student Portal</span>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 flex items-center justify-center">
+                <img src="/logo.png" alt="SIWES Logo" className="w-full h-full object-contain" />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Student Portal</span>
+            </div>
             <h1 className="text-4xl md:text-5xl font-serif text-primary mb-4 leading-tight">Welcome back.</h1>
             <p className="text-slate-500 font-light leading-relaxed">
               Sign in to manage your digital logbook, track your hours, and submit placement requests.

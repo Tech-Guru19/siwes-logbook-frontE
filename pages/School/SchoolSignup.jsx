@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { ArrowLeft, Mail as MailIcon, Lock, Building, KeyRound, CheckCircle2, RefreshCw, ArrowRight } from 'lucide-react'
+import { useDialog } from '../../src/context/DialogContext'
 
 const SchoolSignup = () => {
     const navigate = useNavigate()
+    const { showAlert } = useDialog()
     const [Name, setName] = useState("")
     const [Mail, setMail] = useState("")
     const [password, setpassword] = useState("")
@@ -16,13 +18,13 @@ const SchoolSignup = () => {
     const proceed = (e) => {
         e.preventDefault()
         if (!Name || !Mail || !password || !Location || !otpCode) {
-            return alert("Please input all parameters including OTP code")
+            return showAlert("Please input all parameters including OTP code")
         }
         if (!isOtpVerified) {
-            return alert("Please verify your email address with the OTP code first.")
+            return showAlert("Please verify your email address with the OTP code first.")
         }
         if (password.length < 5) {
-            return alert("Please use a strong password")
+            return showAlert("Please use a strong password")
         }
         navigate("/school/signup/proceed", {
             state: {
@@ -36,30 +38,30 @@ const SchoolSignup = () => {
     }
 
     const handleSendOtp = async () => {
-        if (!Mail) return alert("Please enter the admin email address first.");
+        if (!Mail) return showAlert("Please enter the admin email address first.");
         setOtpLoading(true);
         try {
             const { default: axios } = await import('axios');
             await axios.post("https://siwes-logbook-backend.onrender.com/auth/otp/send", { email_address: Mail });
-            alert("OTP sent to your email!");
+            showAlert("OTP sent to your email!");
             setIsOtpSent(true);
         } catch (err) {
-            alert(err?.response?.data?.message || "Failed to send OTP.");
+            showAlert(err?.response?.data?.message || "Failed to send OTP.");
         } finally {
             setOtpLoading(false);
         }
     };
 
     const handleVerifyOtp = async () => {
-        if (!otpCode) return alert("Please enter the OTP code.");
+        if (!otpCode) return showAlert("Please enter the OTP code.");
         setOtpLoading(true);
         try {
             const { default: axios } = await import('axios');
             await axios.post("https://siwes-logbook-backend.onrender.com/auth/otp/verify", { email_address: Mail, otp_code: otpCode });
-            alert("Email verified successfully!");
+            showAlert("Email verified successfully!");
             setIsOtpVerified(true);
         } catch (err) {
-            alert(err?.response?.data?.message || "Invalid OTP code.");
+            showAlert(err?.response?.data?.message || "Invalid OTP code.");
         } finally {
             setOtpLoading(false);
         }
@@ -76,7 +78,12 @@ const SchoolSignup = () => {
 
                 <div className="flex-1 flex flex-col justify-center max-w-md w-full mx-auto mt-20 lg:mt-10 mb-10">
                     <div className="mb-10">
-                        <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary-fixed-dim mb-4 block">Institutional Setup (Step 1 of 2)</span>
+                        <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 flex items-center justify-center">
+                <img src="/logo.png" alt="SIWES Logo" className="w-full h-full object-contain" />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Institutional Setup (Step 1 of 2)</span>
+            </div>
                         <h1 className="text-4xl md:text-5xl font-serif text-primary mb-4 leading-tight">Register your <br/>institution.</h1>
                         <p className="text-slate-500 font-light leading-relaxed">
                             Provide your basic institution details to initialize the SIWES management platform.
@@ -139,7 +146,7 @@ const SchoolSignup = () => {
                                         <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" strokeWidth={1.5} />
                                         <input
                                             className="w-full h-14 pl-12 pr-4 bg-white border border-slate-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none text-base tracking-[0.3em] font-bold transition-all"
-                                            placeholder="123456"
+                                            placeholder="1234"
                                             type="text"
                                             required
                                             value={otpCode}

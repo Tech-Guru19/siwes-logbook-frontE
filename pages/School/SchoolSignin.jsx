@@ -3,17 +3,19 @@ import React, { useContext, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { context } from '../../src/App'
 import { ArrowLeft, Mail, Lock, LogIn } from 'lucide-react'
+import { useDialog } from '../../src/context/DialogContext'
 
 const SchoolSignin = () => {
     const { setSchoolCred } = useContext(context)
     const navigate = useNavigate()
+    const { showAlert } = useDialog()
     const [mail, setMail] = useState("")
     const [password, setpassword] = useState("")
     const [isLoading, setIsLoading] = useState(false)
 
     const signin = (e) => {
         e.preventDefault()
-        if (!mail || !password) return alert("Please fill in all parameters")
+        if (!mail || !password) return showAlert("Please fill in all parameters")
         setIsLoading(true)
         axios.post("https://siwes-logbook-backend.onrender.com/school/signin", {
             email_address: mail,
@@ -24,7 +26,7 @@ const SchoolSignin = () => {
                 navigate("/school/dashboard")
             })
             .catch((error) => {
-                alert(error?.response?.data?.message || "Sign in failed. Check credentials.")
+                showAlert(error?.response?.data?.message || "Sign in failed. Check credentials.")
             })
             .finally(() => {
                 setIsLoading(false)
@@ -42,7 +44,12 @@ const SchoolSignin = () => {
 
                 <div className="flex-1 flex flex-col justify-center max-w-md w-full mx-auto mt-16 lg:mt-0">
                     <div className="mb-10">
-                        <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary-fixed-dim mb-4 block">Institutional Coordinator</span>
+                        <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 flex items-center justify-center">
+                <img src="/logo.png" alt="SIWES Logo" className="w-full h-full object-contain" />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Institutional Coordinator</span>
+            </div>
                         <h1 className="text-4xl md:text-5xl font-serif text-primary mb-4 leading-tight">Institution Login.</h1>
                         <p className="text-slate-500 font-light leading-relaxed">
                             Access your management portal to register departments, monitor students, and oversee academic supervisors.

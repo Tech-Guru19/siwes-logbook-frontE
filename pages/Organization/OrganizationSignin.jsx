@@ -3,16 +3,18 @@ import { Link, useNavigate } from 'react-router-dom'
 import { context } from '../../src/App'
 import axios from 'axios'
 import { ArrowLeft, Mail, Lock, LogIn } from 'lucide-react'
+import { useDialog } from '../../src/context/DialogContext'
 
 const OrganizationSignin = () => {
     const navigate = useNavigate()
+    const { showAlert } = useDialog()
     const { setOrganizationCred } = useContext(context)
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
 
     const handleSignin = (e) => {
         e.preventDefault()
-        if (!email || !password) return alert('Please enter your email and password')
+        if (!email || !password) return showAlert('Please enter your email and password')
 
         axios.post('https://siwes-logbook-backend.onrender.com/organization/signin', {
             Email_Address: email,
@@ -21,11 +23,11 @@ const OrganizationSignin = () => {
         .then((res) => {
             const orgData = res?.data?.message
             setOrganizationCred(orgData)
-            alert('Welcome back, ' + (orgData?.Name || 'Organization Admin'))
+            showAlert('Welcome back, ' + (orgData?.Name || 'Organization Admin'))
             navigate('/organization/dashboard')
         })
         .catch((err) => {
-            alert(err?.response?.data?.message || 'Login failed. Please verify credentials.')
+            showAlert(err?.response?.data?.message || 'Login failed. Please verify credentials.')
         })
     }
 
@@ -40,7 +42,12 @@ const OrganizationSignin = () => {
 
                 <div className="flex-1 flex flex-col justify-center max-w-md w-full mx-auto mt-16 lg:mt-0">
                     <div className="mb-10">
-                        <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary-fixed-dim mb-4 block">Company Administrator</span>
+                        <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 flex items-center justify-center">
+                <img src="/logo.png" alt="SIWES Logo" className="w-full h-full object-contain" />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Company Administrator</span>
+            </div>
                         <h1 className="text-4xl md:text-5xl font-serif text-primary mb-4 leading-tight">Corporate Login.</h1>
                         <p className="text-slate-500 font-light leading-relaxed">
                             Log in to verify intern daily schedules, approve student placements, and assign corporate supervisors.

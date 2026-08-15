@@ -45,8 +45,8 @@ const AdminSignin = () => {
         <div className="min-h-screen bg-surface flex items-center justify-center p-4">
             <div className="bg-surface-container-lowest p-8 rounded-2xl shadow-sm border border-outline-variant w-full max-w-md">
                 <div className="text-center mb-8">
-                    <div className="w-16 h-16 bg-primary-container text-white rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <span className="material-symbols-outlined text-3xl">admin_panel_settings</span>
+                    <div className="w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <img src="/logo.png" alt="SIWES Logo" className="w-full h-full object-contain" />
                     </div>
                     <h1 className="text-2xl font-h1 font-bold text-primary">Super Admin Portal</h1>
                     <p className="text-sm text-on-surface-variant font-medium mt-2">Restricted access. Authorized personnel only.</p>

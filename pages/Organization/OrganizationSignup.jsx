@@ -3,9 +3,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { uploadImg } from '../../Cloudinary'
 import { ArrowLeft, Mail, Lock, Building, KeyRound, CheckCircle2, RefreshCw, MapPin, Home, UploadCloud, X, Building2 } from 'lucide-react'
+import { useDialog } from '../../src/context/DialogContext'
 
 const OrganizationSignup = () => {
     const navigate = useNavigate()
+    const { showAlert } = useDialog()
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -23,7 +25,7 @@ const OrganizationSignup = () => {
     const handleImageSelect = (file) => {
         if (!file) return;
         if (!file.type.startsWith("image/")) {
-            return alert("Please select an image file.");
+            return showAlert("Please select an image file.");
         }
         setSelectedFile(file);
         const reader = new FileReader();
@@ -46,10 +48,10 @@ const OrganizationSignup = () => {
     const handleSignup = async (e) => {
         e.preventDefault()
         if (!name || !email || !password || !location || !selectedFile || !contactAddress || !otpCode) {
-            return alert('Please fill in all required fields including OTP code and CAC Image')
+            return showAlert('Please fill in all required fields including OTP code and CAC Image')
         }
         if (!isOtpVerified) {
-            return alert('Please verify your email address with the OTP code first.')
+            return showAlert('Please verify your email address with the OTP code first.')
         }
 
         setLoading(true)
@@ -69,7 +71,7 @@ const OrganizationSignup = () => {
                 }
             } catch (err) {
                 setLoading(false);
-                return alert("Image upload failed. Please try again.");
+                return showAlert("Image upload failed. Please try again.");
             }
         }
 
@@ -83,11 +85,11 @@ const OrganizationSignup = () => {
             otp_code: otpCode
         })
         .then(() => {
-            alert('Organization account registered successfully! Please log in.')
+            showAlert('Organization account registered successfully! Please log in.')
             navigate('/organization/signin')
         })
         .catch((err) => {
-            alert(err?.response?.data?.message || 'Registration failed. Please try again.')
+            showAlert(err?.response?.data?.message || 'Registration failed. Please try again.')
         })
         .finally(() => {
             setLoading(false)
@@ -95,28 +97,28 @@ const OrganizationSignup = () => {
     }
 
     const handleSendOtp = async () => {
-        if (!email) return alert("Please enter the official email address first.");
+        if (!email) return showAlert("Please enter the official email address first.");
         setOtpLoading(true);
         try {
             await axios.post("https://siwes-logbook-backend.onrender.com/auth/otp/send", { email_address: email });
-            alert("OTP sent to your email!");
+            showAlert("OTP sent to your email!");
             setIsOtpSent(true);
         } catch (err) {
-            alert(err?.response?.data?.message || "Failed to send OTP.");
+            showAlert(err?.response?.data?.message || "Failed to send OTP.");
         } finally {
             setOtpLoading(false);
         }
     };
 
     const handleVerifyOtp = async () => {
-        if (!otpCode) return alert("Please enter the OTP code.");
+        if (!otpCode) return showAlert("Please enter the OTP code.");
         setOtpLoading(true);
         try {
             await axios.post("https://siwes-logbook-backend.onrender.com/auth/otp/verify", { email_address: email, otp_code: otpCode });
-            alert("Email verified successfully!");
+            showAlert("Email verified successfully!");
             setIsOtpVerified(true);
         } catch (err) {
-            alert(err?.response?.data?.message || "Invalid OTP code.");
+            showAlert(err?.response?.data?.message || "Invalid OTP code.");
         } finally {
             setOtpLoading(false);
         }
@@ -133,7 +135,12 @@ const OrganizationSignup = () => {
 
                 <div className="flex-1 flex flex-col justify-center max-w-md w-full mx-auto mt-24 lg:mt-12 mb-10">
                     <div className="mb-10">
-                        <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary-fixed-dim mb-4 block">Corporate Registration</span>
+                        <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 flex items-center justify-center">
+                <img src="/logo.png" alt="SIWES Logo" className="w-full h-full object-contain" />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Corporate Registration</span>
+            </div>
                         <h1 className="text-4xl md:text-5xl font-serif text-primary mb-4 leading-tight">Partner Organization.</h1>
                         <p className="text-slate-500 font-light leading-relaxed">
                             Register your company to host SIWES interns, assign mentors, and manage training logbooks.
@@ -196,7 +203,7 @@ const OrganizationSignup = () => {
                                         <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" strokeWidth={1.5} />
                                         <input
                                             className="w-full h-14 pl-12 pr-4 bg-white border border-slate-200 rounded-xl focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none text-base tracking-[0.3em] font-bold transition-all"
-                                            placeholder="123456"
+                                            placeholder="1234"
                                             type="text"
                                             required
                                             value={otpCode}

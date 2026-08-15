@@ -39,6 +39,9 @@ const CoordinatorLogin = () => {
             <div className="w-full max-w-md flex flex-col gap-xl">
               <div className="flex flex-col gap-sm">
                 <div className="flex items-center gap-sm md:hidden mb-md">
+                  <div className="w-12 h-12 flex items-center justify-center">
+                    <img src="/logo.png" alt="SIWES Logo" className="w-full h-full object-contain" />
+                  </div>
                   <span className="font-h2 text-h2 font-bold text-primary">
                     SIWES Management
                   </span>

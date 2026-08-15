@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Logo from '../src/components/Logo';
 import axios from 'axios';
 import { context } from '../src/App';
 import { 
@@ -7,9 +8,11 @@ import {
     Users, Headset, LogOut, ShieldCheck, 
     Edit3, Trash2, X 
 } from 'lucide-react';
+import { useDialog } from '../src/context/DialogContext';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
+    const { showAlert, showConfirm } = useDialog();
     const { adminCred } = useContext(context);
     const [activeTab, setActiveTab] = useState('overview');
     const [stats, setStats] = useState({ students: 0, organizations: 0, schools: 0 });
@@ -28,7 +31,7 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         if (!adminCred) {
-            navigate('/Admin');
+            navigate('/register/accountType');
             return;
         }
         fetchAllData();
@@ -62,27 +65,29 @@ const AdminDashboard = () => {
     };
 
     const handleResolveTicket = async (id) => {
-        if (!window.confirm("Mark this ticket as resolved?")) return;
+        const confirm = await showConfirm("Mark this ticket as resolved?");
+        if (!confirm) return;
         try {
             await axios.post('https://siwes-logbook-backend.onrender.com/admin/tickets/resolve', { id });
-            alert("Ticket resolved successfully.");
+            showAlert("Ticket resolved successfully.");
             fetchAllData();
         } catch (error) {
             console.error(error);
-            alert("Error resolving ticket.");
+            showAlert("Error resolving ticket.");
         }
     };
 
     const handleDelete = async (type, id) => {
-        if (!window.confirm("Are you sure you want to delete this record? This action cannot be undone.")) return;
+        const confirm = await showConfirm("Are you sure you want to delete this record? This action cannot be undone.");
+        if (!confirm) return;
         
         try {
             await axios.post('https://siwes-logbook-backend.onrender.com/admin/delete', { type, id });
-            alert("Record deleted successfully.");
+            showAlert("Record deleted successfully.");
             fetchAllData();
         } catch (error) {
             console.error(error);
-            alert("Error deleting record.");
+            showAlert("Error deleting record.");
         }
     };
 
@@ -106,12 +111,12 @@ const AdminDashboard = () => {
                 id: editId, 
                 data: editData 
             });
-            alert("Record updated successfully.");
+            showAlert("Record updated successfully.");
             setIsEditModalOpen(false);
             fetchAllData();
         } catch (error) {
             console.error(error);
-            alert("Error updating record.");
+            showAlert("Error updating record.");
         } finally {
             setSubmitting(false);
         }
@@ -132,15 +137,7 @@ const AdminDashboard = () => {
         <div className="flex bg-[#FDFDFB] min-h-screen font-sans selection:bg-primary/20 text-slate-600">
             {/* Premium Sidebar */}
             <aside className="h-screen w-72 border-r border-slate-100 fixed left-0 top-0 bg-white flex flex-col py-8 z-40 shadow-[4px_0_24px_rgba(0,32,69,0.02)] hidden lg:flex">
-                <div className="px-8 mb-12 flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-sm">
-                        <Shield className="text-white w-5 h-5" />
-                    </div>
-                    <div>
-                        <h2 className="text-lg font-serif font-bold text-primary tracking-tight">Super Admin</h2>
-                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest truncate max-w-[150px] block">{adminCred?.email}</span>
-                    </div>
-                </div>
+                <Logo size="md" className="px-8 mb-12" title="Super Admin" subtitle={adminCred?.email} />
 
                 <nav className="flex-grow flex flex-col px-4 gap-2 overflow-y-auto custom-scrollbar">
                     <button 
@@ -203,7 +200,7 @@ const AdminDashboard = () => {
             </aside>
 
             {/* Main Content */}
-            <main className="lg:ml-72 flex-1 p-6 lg:p-12 xl:p-16 space-y-12 max-w-[1400px]">
+            <main className="lg:ml-72 flex-1 p-6 lg:p-12 xl:p-16 pt-4 lg:pt-8 xl:pt-8 space-y-12">
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-slate-100 pb-6">
                     <div>

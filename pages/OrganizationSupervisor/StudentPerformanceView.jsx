@@ -10,10 +10,12 @@ import {
     XCircle, ClipboardCheck, MessageSquare, Clock, Image as ImageIcon,
     Building2, Mail, Users
 } from 'lucide-react'
+import { useDialog } from '../../src/context/DialogContext'
 
 const StudentPerformanceView = () => {
     const { id } = useParams()
     const navigate = useNavigate()
+    const { showAlert, showConfirm } = useDialog()
     const { organizationSupervisorCred, schoolSupervisorCred, schoolCred, studentCred, organizationCred } = useContext(context)
     const [student, setStudent] = useState(null)
     const [logbooks, setLogbooks] = useState([])
@@ -36,7 +38,7 @@ const StudentPerformanceView = () => {
 
     useEffect(() => {
         if (!isOrgSupervisor && !isSchoolSupervisor && !isSchoolAdmin && !isStudent && !isOrganization) {
-            navigate('/')
+            navigate('/register/accountType')
             return
         }
         fetchData()
@@ -75,7 +77,7 @@ const StudentPerformanceView = () => {
     const handleEvaluationSubmit = async (e) => {
         e.preventDefault()
         if (Object.values(evalForm).some(v => v === '')) {
-            alert("Please fill in all evaluation fields.")
+            showAlert("Please fill in all evaluation fields.")
             return
         }
 
@@ -93,27 +95,28 @@ const StudentPerformanceView = () => {
                 ...evalForm,
                 total_score
             })
-            alert("Evaluation submitted successfully!")
+            showAlert("Evaluation submitted successfully!")
             fetchData()
         } catch (error) {
             console.error(error)
-            alert("Failed to submit evaluation")
+            showAlert("Failed to submit evaluation")
         }
     }
 
     const handleLeaveAction = async (leave_id, status) => {
-        if (!confirm(`Are you sure you want to ${status} this leave request?`)) return;
+        const confirmResult = await showConfirm(`Are you sure you want to ${status} this leave request?`);
+        if (!confirmResult) return;
         try {
             await axios.post('https://siwes-logbook-backend.onrender.com/leave/update-status', {
                 leave_id,
                 status,
                 org_supervisor_id: organizationSupervisorCred.id
             });
-            alert(`Leave request ${status} successfully.`);
+            showAlert(`Leave request ${status} successfully.`);
             fetchData();
         } catch (error) {
             console.error(error);
-            alert(error?.response?.data?.message || "Failed to update leave request");
+            showAlert(error?.response?.data?.message || "Failed to update leave request");
         }
     };
 

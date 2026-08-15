@@ -61,8 +61,8 @@ const Support = () => {
       <header className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 shadow-sm">
         <nav className="flex items-center justify-between px-6 lg:px-12 h-20 max-w-7xl mx-auto">
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-full border border-primary/20 flex items-center justify-center transition-all duration-300 group-hover:bg-primary group-hover:border-primary">
-              <LifeBuoy className="text-primary w-5 h-5 transition-colors duration-300 group-hover:text-white" strokeWidth={1.5} />
+            <div className="w-14 h-14 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+              <img src="/logo.png" alt="SIWES Logo" className="w-full h-full object-contain" />
             </div>
             <span className="text-xl font-serif font-medium tracking-tight text-primary">
               SIWES Support

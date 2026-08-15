@@ -1,4 +1,5 @@
 import React from "react";
+import Logo from '../src/components/Logo';
 import { 
     GraduationCap, LayoutDashboard, FileSignature, Users, 
     Settings, HelpCircle, LogOut, Search, Download, Plus, 
@@ -11,15 +12,7 @@ const CoordinatorDashboard = () => {
         <div className="flex bg-[#FDFDFB] min-h-screen font-sans selection:bg-primary/20 text-slate-600">
             {/* Premium Sidebar */}
             <aside className="h-screen w-72 border-r border-slate-100 fixed left-0 top-0 bg-white flex flex-col py-8 z-40 shadow-[4px_0_24px_rgba(0,32,69,0.02)] hidden lg:flex">
-                <div className="px-8 mb-12 flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-                        <GraduationCap className="text-white w-5 h-5" />
-                    </div>
-                    <div>
-                        <h1 className="text-lg font-serif font-bold text-primary tracking-tight">SIWES Portal</h1>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Academic Mgmt</p>
-                    </div>
-                </div>
+                <Logo size="md" className="px-8 mb-12" subtitle="Academic Mgmt" />
 
                 <nav className="flex-grow flex flex-col px-4 gap-2">
                     <button className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm transition-all text-left bg-primary/5 text-primary font-bold shadow-sm">
@@ -53,7 +46,7 @@ const CoordinatorDashboard = () => {
             </aside>
 
             {/* Main Content */}
-            <main className="lg:ml-72 flex-1 p-6 lg:p-12 xl:p-16 space-y-12 max-w-[1400px]">
+            <main className="lg:ml-72 flex-1 p-6 lg:p-12 xl:p-16 pt-4 lg:pt-8 xl:pt-8 space-y-12">
                 
                 {/* Header Banner */}
                 <div className="bg-white p-8 lg:p-10 rounded-[2.5rem] border border-slate-100 shadow-[0_20px_50px_rgba(0,32,69,0.03)] flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">

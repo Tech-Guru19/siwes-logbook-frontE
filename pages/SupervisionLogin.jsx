@@ -3,16 +3,18 @@ import { Link, useNavigate } from 'react-router-dom'
 import { context } from '../src/App'
 import axios from 'axios'
 import { ArrowLeft, Mail, Lock, LogIn } from 'lucide-react'
+import { useDialog } from '../src/context/DialogContext'
 
 const SupervisionLogin = () => {
   const navigate = useNavigate()
+  const { showAlert } = useDialog()
   const { setSchoolSupervisorCred } = useContext(context)
   const [emailAddress, setEmailAddress] = useState('')
   const [password, setPassword] = useState('')
 
   const handleSignin = (e) => {
     e.preventDefault()
-    if (!emailAddress || !password) return alert('Please enter email address and password')
+    if (!emailAddress || !password) return showAlert('Please enter email address and password')
 
     axios.post('https://siwes-logbook-backend.onrender.com/school/supervisor/signin', {
       email_address: emailAddress,
@@ -21,11 +23,11 @@ const SupervisionLogin = () => {
     .then((res) => {
       const supervisorData = res?.data?.message
       setSchoolSupervisorCred(supervisorData)
-      alert('Welcome back, ' + (supervisorData?.Full_Name || 'Academic Supervisor'))
+      showAlert('Welcome back, ' + (supervisorData?.Full_Name || 'Academic Supervisor'))
       navigate('/supervisor-dashboard')
     })
     .catch((err) => {
-      alert(err?.response?.data?.message || 'Login failed. Verify your supervisor credentials.')
+      showAlert(err?.response?.data?.message || 'Login failed. Verify your supervisor credentials.')
     })
   }
 
@@ -40,7 +42,12 @@ const SupervisionLogin = () => {
 
             <div className="flex-1 flex flex-col justify-center max-w-md w-full mx-auto mt-16 lg:mt-0">
                 <div className="mb-10">
-                    <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary-fixed-dim mb-4 block">Academic Supervisor</span>
+                    <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 flex items-center justify-center">
+                <img src="/logo.png" alt="SIWES Logo" className="w-full h-full object-contain" />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Academic Supervisor</span>
+            </div>
                     <h1 className="text-4xl md:text-5xl font-serif text-primary mb-4 leading-tight">Faculty Login.</h1>
                     <p className="text-slate-500 font-light leading-relaxed">
                         Log in to evaluate student logbooks, grade practical progress, and monitor industry placements.

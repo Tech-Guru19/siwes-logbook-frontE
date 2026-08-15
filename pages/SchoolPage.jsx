@@ -11,8 +11,8 @@ const SchoolPage = () => {
         <nav className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100 transition-all duration-200 ease-in-out">
           <div className="flex justify-between items-center px-6 md:px-12 h-20 max-w-7xl mx-auto">
             <div className="text-2xl font-serif font-bold tracking-tight text-primary flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary rounded-xl flex items-center justify-center">
-                  <GraduationCap className="text-white w-5 h-5" />
+              <div className="w-12 h-12 flex items-center justify-center">
+                  <img src="/logo.png" alt="SIWES Logo" className="w-full h-full object-contain" />
               </div>
               SIWES Logbook
             </div>

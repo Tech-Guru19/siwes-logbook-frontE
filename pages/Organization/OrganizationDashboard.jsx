@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { context } from '../../src/App'
+import Logo from '../../src/components/Logo'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { 
@@ -7,9 +8,11 @@ import {
     LogOut, UserCheck, Check, X, Save, 
     UserPlus, Edit3, Trash2, ShieldCheck, ChevronRight 
 } from 'lucide-react'
+import { useDialog } from '../../src/context/DialogContext'
 
 const OrganizationDashboard = () => {
     const navigate = useNavigate()
+    const { showAlert, showConfirm } = useDialog()
     const { organizationCred } = useContext(context)
     const [placements, setPlacements] = useState([])
     const [supervisors, setSupervisors] = useState([])
@@ -32,7 +35,7 @@ const OrganizationDashboard = () => {
 
     useEffect(() => {
         if (!organizationCred) {
-            navigate('/organization/signin')
+            navigate('/register/accountType')
             return
         }
         fetchPlacements()
@@ -73,12 +76,12 @@ const OrganizationDashboard = () => {
             status
         })
         .then(() => {
-            alert(`Placement request ${status.toLowerCase()} successfully`)
+            showAlert(`Placement request ${status.toLowerCase()} successfully`)
             fetchPlacements()
             fetchAcceptedInterns()
         })
         .catch((err) => {
-            alert(err?.response?.data?.message || 'Error updating placement status')
+            showAlert(err?.response?.data?.message || 'Error updating placement status')
         })
     }
 
@@ -88,17 +91,17 @@ const OrganizationDashboard = () => {
             supervisorId
         })
         .then(() => {
-            alert('Industry supervisor assigned successfully!')
+            showAlert('Industry supervisor assigned successfully!')
             fetchAcceptedInterns()
         })
         .catch((err) => {
-            alert(err?.response?.data?.message || 'Error assigning supervisor')
+            showAlert(err?.response?.data?.message || 'Error assigning supervisor')
         })
     }
 
     const handleSubmitSupervisor = (e) => {
         e.preventDefault()
-        if (!supName || !supEmail) return alert('Please enter supervisor name and email')
+        if (!supName || !supEmail) return showAlert('Please enter supervisor name and email')
 
         if (isEditingSup) {
             axios.post('https://siwes-logbook-backend.onrender.com/organization-supervisor/update', {
@@ -111,11 +114,11 @@ const OrganizationDashboard = () => {
                 focus_areas: supFocus
             })
             .then(() => {
-                alert('Supervisor updated successfully')
+                showAlert('Supervisor updated successfully')
                 resetSupForm()
                 fetchSupervisors()
             })
-            .catch((err) => alert(err?.response?.data?.message || 'Error updating supervisor'))
+            .catch((err) => showAlert(err?.response?.data?.message || 'Error updating supervisor'))
         } else {
             axios.post('https://siwes-logbook-backend.onrender.com/organization/create/supervisor', {
                 Organization_Id: organizationCred?.id,
@@ -128,11 +131,11 @@ const OrganizationDashboard = () => {
                 focus_areas: supFocus
             })
             .then(() => {
-                alert('Supervisor pre-registered successfully! They can now activate their account.')
+                showAlert('Supervisor pre-registered successfully! They can now activate their account.')
                 resetSupForm()
                 fetchSupervisors()
             })
-            .catch((err) => alert(err?.response?.data?.message || 'Error creating supervisor'))
+            .catch((err) => showAlert(err?.response?.data?.message || 'Error creating supervisor'))
         }
     }
 
@@ -160,29 +163,22 @@ const OrganizationDashboard = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
-    const handleDeleteSup = (id) => {
-        if (!window.confirm('Are you sure you want to delete this supervisor?')) return
+    const handleDeleteSup = async (id) => {
+        const confirm = await showConfirm('Are you sure you want to delete this supervisor?')
+        if (!confirm) return
         axios.post('https://siwes-logbook-backend.onrender.com/organization-supervisor/delete', { id })
             .then(() => {
-                alert('Supervisor deleted')
+                showAlert('Supervisor deleted')
                 fetchSupervisors()
             })
-            .catch((err) => alert(err?.response?.data?.message || 'Error deleting supervisor'))
+            .catch((err) => showAlert(err?.response?.data?.message || 'Error deleting supervisor'))
     }
 
     return (
         <div className="flex bg-[#FDFDFB] min-h-screen font-sans selection:bg-primary/20 text-slate-600">
             {/* Premium Sidebar */}
             <aside className="h-screen w-72 border-r border-slate-100 fixed left-0 top-0 bg-white flex flex-col py-8 z-40 shadow-[4px_0_24px_rgba(0,32,69,0.02)] hidden lg:flex">
-                <div className="px-8 mb-12 flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-                        <Building2 className="text-white w-5 h-5" />
-                    </div>
-                    <div>
-                        <h1 className="text-lg font-serif font-bold text-primary tracking-tight truncate max-w-[150px]">{organizationCred?.Name || 'Organization'}</h1>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Corporate Portal</p>
-                    </div>
-                </div>
+                <Logo size="md" className="px-8 mb-12" title={organizationCred?.Name || 'Organization'} subtitle="SIWES Portal" />
 
                 <nav className="flex-grow flex flex-col px-4 gap-2 overflow-y-auto custom-scrollbar">
                     <button 
@@ -224,7 +220,7 @@ const OrganizationDashboard = () => {
             </aside>
 
             {/* Main Content */}
-            <main className="lg:ml-72 flex-1 p-6 lg:p-12 xl:p-16 space-y-12 max-w-[1400px]">
+            <main className="lg:ml-72 flex-1 p-6 lg:p-12 xl:p-16 pt-4 lg:pt-8 xl:pt-8 space-y-12">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-slate-100 pb-6">
                     <div>
