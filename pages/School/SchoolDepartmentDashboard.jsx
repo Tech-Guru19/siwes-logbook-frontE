@@ -4,8 +4,9 @@ import Logo from '../../src/components/Logo'
 import { useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
 import user from '../../public/profile.png'
-import { Building2, LayoutDashboard, GraduationCap, Users, Building, LogOut, ChevronRight, FolderPlus, Save, PlusCircle, Filter, Download, Edit3, Trash2, Menu, X } from 'lucide-react'
+import { Building2, LayoutDashboard, GraduationCap, Users, Building, LogOut, ChevronRight, FolderPlus, Save, PlusCircle, Filter, Download, Edit3, Trash2, Menu, X, Upload } from 'lucide-react'
 import { useDialog } from '../../src/context/DialogContext'
+import { parseExcelFile, exportToExcel } from '../../src/utils/excelUtils'
 
 const SchoolDepartmentDashboard = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -17,6 +18,8 @@ const SchoolDepartmentDashboard = () => {
     const [HODName, setHODName] = useState("")
     const [isEditing, setIsEditing] = useState(false)
     const [editingId, setEditingId] = useState(null)
+    const [searchQuery, setSearchQuery] = useState("")
+    const fileInputRef = React.useRef(null)
 
     useEffect(() => {
         if (!schoolCred) return navigate("/register/accountType")
@@ -98,7 +101,59 @@ const SchoolDepartmentDashboard = () => {
                 showAlert(err?.response?.data?.message || "Error deleting department")
             })
     }
+
+    const handleExport = () => {
+        if (!schoolDepartments || schoolDepartments.length === 0) return showAlert("No departments to export");
+        const exportData = schoolDepartments.map(dept => ({
+            "Department Name": dept.department_name,
+            "Faculty Name": dept.faculty_name,
+            "HOD Name": dept.Hod_name
+        }));
+        exportToExcel(exportData, "Departments_Export");
+    }
+
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+            const data = await parseExcelFile(file);
+            if (data.length === 0) return showAlert("The uploaded file is empty.");
+            
+            // Map the parsed data to match backend expectations
+            // Expected columns in Excel: "Department Name", "Faculty Name", "HOD Name"
+            const departments = data.map(row => ({
+                departmentName: row["Department Name"] || row.departmentName || row.department_name,
+                facultyName: row["Faculty Name"] || row.facultyName || row.faculty_name,
+                HODName: row["HOD Name"] || row.HODName || row.Hod_name
+            })).filter(d => d.departmentName); // filter out empty rows
+            
+            if (departments.length === 0) return showAlert("Could not find valid department data. Please check the columns.");
+            
+            axios.post("http://localhost:5687/school/register/department/batch", {
+                departments,
+                instituitionId: schoolCred?.id
+            }).then((res) => {
+                showAlert(res.data.message);
+                // Refresh departments
+                axios.post("http://localhost:5687/school/register/department/fetch", { id: schoolCred?.id })
+                    .then((output) => {
+                        setSchoolDepartments(output?.data?.message)
+                    })
+            }).catch(err => {
+                showAlert(err?.response?.data?.message || "Error during batch upload");
+            });
+        } catch (err) {
+            showAlert("Error parsing the file. Please ensure it's a valid Excel/CSV file.");
+        } finally {
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        }
+    }
     
+    const filteredDepartments = schoolDepartments?.filter(dept => 
+        dept?.department_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        dept?.faculty_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        dept?.Hod_name?.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [];
     return (
         <div className="flex bg-[#FDFDFB] min-h-screen font-sans selection:bg-primary/20 text-slate-600">
             {/* Premium Sidebar */}
@@ -212,6 +267,12 @@ const SchoolDepartmentDashboard = () => {
                                         {isEditing ? <Save className="w-4 h-4" /> : <PlusCircle className="w-4 h-4" />}
                                         {isEditing ? "Save Changes" : "Create Dept"}
                                     </button>
+                                    {!isEditing && (
+                                        <button onClick={() => fileInputRef.current?.click()} className="w-full h-12 bg-emerald-50 text-emerald-600 font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-emerald-100 transition-colors flex items-center justify-center gap-2">
+                                            <Upload className="w-4 h-4" /> Batch Import
+                                        </button>
+                                    )}
+                                    <input type="file" accept=".xlsx, .xls, .csv" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
                                     {isEditing && (
                                         <button onClick={resetForm} className="w-full h-12 bg-slate-100 text-slate-600 font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-slate-200 transition-colors">
                                             Cancel
@@ -219,6 +280,15 @@ const SchoolDepartmentDashboard = () => {
                                     )}
                                 </div>
                             </div>
+                            {!isEditing && (
+                                <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-xl flex gap-3 text-sm text-blue-800">
+                                    <div className="shrink-0 mt-0.5"><Upload className="w-4 h-4 text-blue-600" /></div>
+                                    <div>
+                                        <p className="font-bold mb-1">Batch Import Guidelines</p>
+                                        <p className="font-light">Upload an Excel (.xlsx, .xls) or CSV file. Ensure your file contains headers exactly matching: <strong>Department Name, Faculty Name, HOD Name</strong>. Empty rows are ignored.</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </section>
 
@@ -237,11 +307,18 @@ const SchoolDepartmentDashboard = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex gap-3">
-                                <button className="flex items-center gap-2 px-5 h-10 bg-slate-50 text-slate-600 border border-slate-200 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-colors">
-                                    <Filter className="w-4 h-4" /> Filter
-                                </button>
-                                <button className="flex items-center gap-2 px-5 h-10 bg-slate-50 text-slate-600 border border-slate-200 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-colors">
+                            <div className="flex gap-3 items-center">
+                                <div className="relative">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Search departments..." 
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="h-10 bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 text-xs font-medium focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none text-slate-800 w-48 lg:w-64"
+                                    />
+                                    <Filter className="w-4 h-4 text-slate-400 absolute left-4 top-3" />
+                                </div>
+                                <button onClick={handleExport} className="flex items-center gap-2 px-5 h-10 bg-slate-50 text-slate-600 border border-slate-200 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-colors">
                                     <Download className="w-4 h-4" /> Export
                                 </button>
                             </div>
@@ -259,12 +336,12 @@ const SchoolDepartmentDashboard = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 text-sm">
-                                    {schoolDepartments.length === 0 ? (
+                                    {filteredDepartments.length === 0 ? (
                                         <tr>
-                                            <td colSpan="5" className="p-10 text-center text-slate-400 font-light text-lg">No departments registered yet.</td>
+                                            <td colSpan="5" className="p-10 text-center text-slate-400 font-light text-lg">No departments found.</td>
                                         </tr>
                                     ) : (
-                                        schoolDepartments.slice().reverse().map((output) => {
+                                        filteredDepartments.slice().reverse().map((output) => {
                                             const count = studentList?.filter((std) => std?.department === output?.department_name).length || 0;
                                             return (
                                                 <tr key={output.id} className="hover:bg-slate-50/50 transition-colors group">

@@ -4,8 +4,9 @@ import { context } from '../../src/App'
 import Logo from '../../src/components/Logo'
 import user from '../../public/profile.png'
 import axios from 'axios'
-import { Building2, LayoutDashboard, GraduationCap, Users, Building, LogOut, ChevronRight, UserPlus, Edit3, Trash2, Filter, Download, Menu, X } from 'lucide-react'
+import { Building2, LayoutDashboard, GraduationCap, Users, Building, LogOut, ChevronRight, UserPlus, Edit3, Trash2, Filter, Download, Menu, X, Upload } from 'lucide-react'
 import { useDialog } from '../../src/context/DialogContext'
+import { parseExcelFile, exportToExcel } from '../../src/utils/excelUtils'
 
 const SchoolStudentDashboard = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -22,6 +23,8 @@ const SchoolStudentDashboard = () => {
     const [supervisorsList, setSupervisorsList] = useState([])
     const [isEditing, setIsEditing] = useState(false)
     const [editingId, setEditingId] = useState(null)
+    const [searchQuery, setSearchQuery] = useState("")
+    const fileInputRef = React.useRef(null)
 
     const handleOpenStudentDetails = (student) => {
         navigate(`/student-performance/${student.id}`)
@@ -161,6 +164,71 @@ const SchoolStudentDashboard = () => {
             })
     }
 
+    const handleExport = () => {
+        if (!studentList || studentList.length === 0) return showAlert("No students to export");
+        const exportData = studentList.map(st => ({
+            "Full Name": st.Full_Name,
+            "Email Address": st.email_address,
+            "Matric No": st.Matriculation_No,
+            "Department": st.department,
+            "Start Date": st.Start_Date ? new Date(st.Start_Date).toISOString().split('T')[0] : "",
+            "End Date": st.End_Date ? new Date(st.End_Date).toISOString().split('T')[0] : ""
+        }));
+        exportToExcel(exportData, "Students_Export");
+    }
+
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+            const data = await parseExcelFile(file);
+            if (data.length === 0) return showAlert("The uploaded file is empty.");
+            
+            // Expected columns: "Full Name", "Email Address", "Matric No", "Department", "Start Date", "End Date", "Supervisor Email"
+            const students = data.map(row => ({
+                Full_Name: row["Full Name"] || row.Full_Name || row.FullName,
+                email_address: row["Email Address"] || row.email_address || row.Email,
+                Matriculation_No: row["Matric No"] || row.Matriculation_No || row.MatricNo,
+                department: row["Department"] || row.department,
+                Start_Date: row["Start Date"] || row.Start_Date || row.StartDate,
+                End_Date: row["End Date"] || row.End_Date || row.EndDate,
+                Supervisor_Email: row["Supervisor Email"] || row.Supervisor_Email || row.SupervisorEmail
+            })).filter(s => s.Full_Name && s.email_address && s.Matriculation_No);
+            
+            if (students.length === 0) return showAlert("Could not find valid student data. Please check the columns.");
+            
+            const missingSupervisor = students.find(s => !s.Supervisor_Email);
+            if (missingSupervisor) {
+                return showAlert(`Student '${missingSupervisor.Full_Name}' is missing a Supervisor Email in the Excel file.`);
+            }
+
+            axios.post("http://localhost:5687/school/register/student/batch", {
+                students,
+                Instituition_Id: schoolCred?.id,
+                Instituition_Mail: schoolCred?.Mail
+            }).then((res) => {
+                showAlert(res.data.message);
+                axios.post("http://localhost:5687/student/fetch-detailed", { instituition_id: schoolCred?.id })
+                    .then((students) => {
+                        setStudentList(students?.data?.message || [])
+                    })
+            }).catch(err => {
+                showAlert(err?.response?.data?.message || "Error during batch upload");
+            });
+        } catch (err) {
+            showAlert("Error parsing the file. Please ensure it's a valid Excel/CSV file.");
+        } finally {
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        }
+    }
+
+    const filteredStudents = studentList?.filter(student => 
+        student?.Full_Name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        student?.email_address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        student?.Matriculation_No?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        student?.department?.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [];
+
     return (
         <div className="flex bg-[#FDFDFB] min-h-screen font-sans selection:bg-primary/20 text-slate-600">
             {/* Premium Sidebar */}
@@ -293,11 +361,29 @@ const SchoolStudentDashboard = () => {
                                 </div>
                             </div>
                             
+                            {!isEditing && (
+                                <div className="mt-2 mb-2 p-4 bg-blue-50 border border-blue-100 rounded-xl flex gap-3 text-sm text-blue-800">
+                                    <div className="shrink-0 mt-0.5"><Upload className="w-4 h-4 text-blue-600" /></div>
+                                    <div>
+                                        <p className="font-bold mb-1">Batch Import Guidelines</p>
+                                        <p className="font-light">Upload an Excel (.xlsx, .xls) or CSV file. Ensure your file contains headers exactly matching: <strong>Full Name, Email Address, Matric No, Department, Start Date, End Date, Supervisor Email</strong>. Empty rows are ignored.</p>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className="flex justify-end gap-4 pt-4 border-t border-slate-100">
                                 {isEditing && (
                                     <button onClick={resetForm} className="px-8 h-12 bg-slate-100 text-slate-600 font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-slate-200 transition-colors">
                                         Cancel
                                     </button>
+                                )}
+                                {!isEditing && (
+                                    <>
+                                        <button onClick={() => fileInputRef.current?.click()} className="px-8 h-12 bg-emerald-50 text-emerald-600 font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-emerald-100 transition-colors flex items-center justify-center gap-2">
+                                            <Upload className="w-4 h-4" /> Batch Import
+                                        </button>
+                                        <input type="file" accept=".xlsx, .xls, .csv" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
+                                    </>
                                 )}
                                 <button onClick={handleSubmitStudent} className="px-8 h-12 bg-primary text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all">
                                     {isEditing ? "Save Changes" : "Enroll Student"}
@@ -313,11 +399,18 @@ const SchoolStudentDashboard = () => {
                                 <h3 className="text-2xl font-serif text-slate-900">Student Directory</h3>
                                 <p className="text-slate-500 font-light mt-1">Manage and monitor current SIWES placements.</p>
                             </div>
-                            <div className="flex gap-3">
-                                <button className="flex items-center gap-2 px-5 h-10 bg-slate-50 text-slate-600 border border-slate-200 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-colors">
-                                    <Filter className="w-4 h-4" /> Filter
-                                </button>
-                                <button className="flex items-center gap-2 px-5 h-10 bg-slate-50 text-slate-600 border border-slate-200 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-colors">
+                            <div className="flex gap-3 items-center">
+                                <div className="relative">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Search students..." 
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="h-10 bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 text-xs font-medium focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none text-slate-800 w-48 lg:w-64"
+                                    />
+                                    <Filter className="w-4 h-4 text-slate-400 absolute left-4 top-3" />
+                                </div>
+                                <button onClick={handleExport} className="flex items-center gap-2 px-5 h-10 bg-slate-50 text-slate-600 border border-slate-200 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-colors">
                                     <Download className="w-4 h-4" /> Export
                                 </button>
                             </div>
@@ -335,12 +428,12 @@ const SchoolStudentDashboard = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 text-sm">
-                                    {studentList?.length === 0 ? (
+                                    {filteredStudents?.length === 0 ? (
                                         <tr>
                                             <td colSpan="5" className="p-10 text-center text-slate-400 font-light text-lg">No students found.</td>
                                         </tr>
                                     ) : (
-                                        studentList?.slice()?.reverse()?.map((student) => {
+                                        filteredStudents?.slice()?.reverse()?.map((student) => {
                                             let statusText = "Active"
                                             let statusColor = "bg-emerald-500"
                                             let statusBg = "bg-emerald-50 text-emerald-600 border-emerald-100"
