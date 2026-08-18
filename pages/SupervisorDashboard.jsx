@@ -34,7 +34,7 @@ const SupervisorDashboard = () => {
 
   const fetchLogbooks = () => {
     if (!schoolSupervisorCred?.id) return;
-    axios.post("http://localhost:5687/user/student/logbook/fetch", {
+    axios.post("https://siwes-logbook-backend.onrender.com/user/student/logbook/fetch", {
       school_supervisor_id: schoolSupervisorCred?.id
     })
     .then((res) => {
@@ -45,7 +45,7 @@ const SupervisorDashboard = () => {
 
   const fetchAssignedStudents = () => {
     if (!schoolSupervisorCred?.id) return;
-    axios.post("http://localhost:5687/student/fetch-detailed", {
+    axios.post("https://siwes-logbook-backend.onrender.com/student/fetch-detailed", {
       school_supervisor_id: schoolSupervisorCred?.id
     })
     .then((res) => {
@@ -58,7 +58,7 @@ const SupervisorDashboard = () => {
     e.preventDefault();
     if (!selectedLog) return;
 
-    axios.post("http://localhost:5687/school-supervisor/logbook/grade", {
+    axios.post("https://siwes-logbook-backend.onrender.com/school-supervisor/logbook/grade", {
       id: selectedLog.id,
       school_supervisor_id: schoolSupervisorCred?.id,
       school_supervisor_grade: grade.toString()

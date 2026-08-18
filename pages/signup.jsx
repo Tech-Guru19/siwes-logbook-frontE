@@ -27,7 +27,7 @@ const Signup = () => {
 
     setLoading(true);
     axios
-      .post("http://localhost:5687/user/student/signup", {
+      .post("https://siwes-logbook-backend.onrender.com/user/student/signup", {
         email_address: personalEmail,
         Instituition_Mail: institutionEmail,
         Contact_Adress: contactAddress,
@@ -52,7 +52,7 @@ const Signup = () => {
       return alert("Please enter your personal email address first.");
     }
     setOtpLoading(true);
-    axios.post("http://localhost:5687/auth/otp/send", { email_address: personalEmail })
+    axios.post("https://siwes-logbook-backend.onrender.com/auth/otp/send", { email_address: personalEmail })
       .then(() => {
         alert("OTP sent to your email!");
         setIsOtpSent(true);
@@ -70,7 +70,7 @@ const Signup = () => {
       return alert("Please enter the OTP code.");
     }
     setOtpLoading(true);
-    axios.post("http://localhost:5687/auth/otp/verify", { email_address: personalEmail, otp_code: otpCode })
+    axios.post("https://siwes-logbook-backend.onrender.com/auth/otp/verify", { email_address: personalEmail, otp_code: otpCode })
       .then(() => {
         alert("Email verified successfully!");
         setIsOtpVerified(true);

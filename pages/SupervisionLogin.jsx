@@ -19,7 +19,7 @@ const SupervisionLogin = () => {
     e.preventDefault()
     if (!emailAddress || !password) return showAlert('Please enter email address and password')
 
-    axios.post('http://localhost:5687/school/supervisor/signin', {
+    axios.post('https://siwes-logbook-backend.onrender.com/school/supervisor/signin', {
       email_address: emailAddress,
       password: password
     })

@@ -26,7 +26,7 @@ const DocumentUploadModal = ({ profile, onClose, onSuccess }) => {
             if (docType === "acceptance") payload.acceptance_letter_url = secureUrl;
             if (docType === "form8") payload.itf_form8_url = secureUrl;
 
-            await axios.post("http://localhost:5687/user/student/update-details", payload);
+            await axios.post("https://siwes-logbook-backend.onrender.com/user/student/update-details", payload);
             
             showAlert("Document uploaded successfully!");
             onSuccess();

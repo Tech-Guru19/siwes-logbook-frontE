@@ -19,7 +19,7 @@ const OrgSupervisorSignin = () => {
         e.preventDefault()
         if (!email || !password) return showAlert('Please enter email and password')
 
-        axios.post('http://localhost:5687/organization-supervisor/signin', {
+        axios.post('https://siwes-logbook-backend.onrender.com/organization-supervisor/signin', {
             email_address: email,
             password: password
         })

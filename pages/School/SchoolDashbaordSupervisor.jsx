@@ -24,7 +24,7 @@ const SchoolDashbaordSupervisor = () => {
     useEffect(() => {
         if (!schoolCred) return navigate("/register/accountType")
         
-        axios.post("http://localhost:5687/school/fetch/supervisor", { id: schoolCred?.id })
+        axios.post("https://siwes-logbook-backend.onrender.com/school/fetch/supervisor", { id: schoolCred?.id })
             .then((res) => {
                 setSchoolSupervisors(res?.data?.message || [])
             })
@@ -43,7 +43,7 @@ const SchoolDashbaordSupervisor = () => {
         if (!fullName || !emailAddress || !Department) return showAlert("Please fill in all parameters")
         
         if (isEditing) {
-            axios.post("http://localhost:5687/school/supervisor/update", {
+            axios.post("https://siwes-logbook-backend.onrender.com/school/supervisor/update", {
                 id: editingId,
                 Full_Name: fullName,
                 Email_Address: emailAddress,
@@ -63,7 +63,7 @@ const SchoolDashbaordSupervisor = () => {
                 showAlert(err?.response?.data?.message || "Error updating supervisor")
             })
         } else {
-            axios.post("http://localhost:5687/school/register/supervisor", {
+            axios.post("https://siwes-logbook-backend.onrender.com/school/register/supervisor", {
                 Full_Name: fullName,
                 Email_Address: emailAddress,
                 Instituition_Id: schoolCred?.id,
@@ -111,7 +111,7 @@ const SchoolDashbaordSupervisor = () => {
     const handleDeleteClick = async (id) => {
         const confirm = await showConfirm("Are you sure you want to delete this supervisor?")
         if (!confirm) return
-        axios.post("http://localhost:5687/school/supervisor/delete", { id })
+        axios.post("https://siwes-logbook-backend.onrender.com/school/supervisor/delete", { id })
             .then(() => {
                 setSchoolSupervisors(prev => prev.filter(s => s.id !== id))
                 showAlert("Supervisor deleted successfully")
@@ -147,12 +147,12 @@ const SchoolDashbaordSupervisor = () => {
             
             if (supervisors.length === 0) return showAlert("Could not find valid supervisor data. Please check the columns.");
             
-            axios.post("http://localhost:5687/school/register/supervisor/batch", {
+            axios.post("https://siwes-logbook-backend.onrender.com/school/register/supervisor/batch", {
                 supervisors,
                 Instituition_Id: schoolCred?.id
             }).then((res) => {
                 showAlert(res.data.message);
-                axios.post("http://localhost:5687/school/fetch/supervisor", { id: schoolCred?.id })
+                axios.post("https://siwes-logbook-backend.onrender.com/school/fetch/supervisor", { id: schoolCred?.id })
                     .then((res) => {
                         setSchoolSupervisors(res?.data?.message || [])
                     })

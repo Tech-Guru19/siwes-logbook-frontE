@@ -48,8 +48,8 @@ const OrganizationSignup = () => {
 
     const handleSignup = async (e) => {
         e.preventDefault()
-        if (!name || !email || !password || !location || !selectedFile || !contactAddress || !otpCode) {
-            return showAlert('Please fill in all required fields including OTP code and CAC Image')
+        if (!name || !email || !password || !location || !contactAddress || !otpCode) {
+            return showAlert('Please fill in all required fields including OTP code')
         }
         if (!isOtpVerified) {
             return showAlert('Please verify your email address with the OTP code first.')
@@ -76,7 +76,7 @@ const OrganizationSignup = () => {
             }
         }
 
-        axios.post('http://localhost:5687/organization/signup', {
+        axios.post('https://siwes-logbook-backend.onrender.com/organization/signup', {
             Name: name,
             Email_Address: email,
             password: password,
@@ -101,7 +101,7 @@ const OrganizationSignup = () => {
         if (!email) return showAlert("Please enter the official email address first.");
         setOtpLoading(true);
         try {
-            await axios.post("http://localhost:5687/auth/otp/send", { email_address: email });
+            await axios.post("https://siwes-logbook-backend.onrender.com/auth/otp/send", { email_address: email });
             showAlert("OTP sent to your email!");
             setIsOtpSent(true);
         } catch (err) {
@@ -115,7 +115,7 @@ const OrganizationSignup = () => {
         if (!otpCode) return showAlert("Please enter the OTP code.");
         setOtpLoading(true);
         try {
-            await axios.post("http://localhost:5687/auth/otp/verify", { email_address: email, otp_code: otpCode });
+            await axios.post("https://siwes-logbook-backend.onrender.com/auth/otp/verify", { email_address: email, otp_code: otpCode });
             showAlert("Email verified successfully!");
             setIsOtpVerified(true);
         } catch (err) {
@@ -277,7 +277,7 @@ const OrganizationSignup = () => {
                         </div>
 
                         <div>
-                            <label className="block text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">CAC Document / Logo Image *</label>
+                            <label className="block text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">CAC Document / Logo Image (Optional)</label>
                             <div
                                 onDragOver={handleDragOver}
                                 onDrop={handleDrop}

@@ -17,7 +17,7 @@ const AdminSignin = () => {
         setLoading(true);
 
         try {
-            const res = await axios.post('http://localhost:5687/admin/login', {
+            const res = await axios.post('https://siwes-logbook-backend.onrender.com/admin/login', {
                 email,
                 password
             });

@@ -33,7 +33,7 @@ const SchoolStudentDashboard = () => {
     useEffect(() => {
         if (!schoolCred) return navigate("/register/accountType")
 
-        axios.post("http://localhost:5687/school/fetch/supervisor", { id: schoolCred?.id })
+        axios.post("https://siwes-logbook-backend.onrender.com/school/fetch/supervisor", { id: schoolCred?.id })
             .then((res) => {
                 const list = res?.data?.message || []
                 setSupervisorsList(list)
@@ -45,7 +45,7 @@ const SchoolStudentDashboard = () => {
                 console.log(err)
             })
 
-        axios.post("http://localhost:5687/student/fetch-detailed", { instituition_id: schoolCred?.id })
+        axios.post("https://siwes-logbook-backend.onrender.com/student/fetch-detailed", { instituition_id: schoolCred?.id })
             .then((students) => {
                 setStudentList(students?.data?.message || [])
             })
@@ -64,7 +64,7 @@ const SchoolStudentDashboard = () => {
         }
 
         if (isEditing) {
-            axios.post("http://localhost:5687/school/student/update", {
+            axios.post("https://siwes-logbook-backend.onrender.com/school/student/update", {
                 id: editingId,
                 Full_Name: fullName,
                 email_address: emailAdress,
@@ -90,7 +90,7 @@ const SchoolStudentDashboard = () => {
                 showAlert(err?.response?.data?.message || "Error updating student")
             })
         } else {
-            axios.post("http://localhost:5687/school/register/student", {
+            axios.post("https://siwes-logbook-backend.onrender.com/school/register/student", {
                 Full_Name: fullName,
                 Instituition_Id: schoolCred?.id,
                 School_Supervisor_Id: supervisorId,
@@ -154,7 +154,7 @@ const SchoolStudentDashboard = () => {
     const handleDeleteClick = async (id) => {
         const confirm = await showConfirm("Are you sure you want to delete this student?")
         if (!confirm) return
-        axios.post("http://localhost:5687/school/student/delete", { id })
+        axios.post("https://siwes-logbook-backend.onrender.com/school/student/delete", { id })
             .then(() => {
                 setStudentList(prev => prev.filter(s => s.id !== id))
                 showAlert("Student deleted successfully")
@@ -202,13 +202,13 @@ const SchoolStudentDashboard = () => {
                 return showAlert(`Student '${missingSupervisor.Full_Name}' is missing a Supervisor Email in the Excel file.`);
             }
 
-            axios.post("http://localhost:5687/school/register/student/batch", {
+            axios.post("https://siwes-logbook-backend.onrender.com/school/register/student/batch", {
                 students,
                 Instituition_Id: schoolCred?.id,
                 Instituition_Mail: schoolCred?.Mail
             }).then((res) => {
                 showAlert(res.data.message);
-                axios.post("http://localhost:5687/student/fetch-detailed", { instituition_id: schoolCred?.id })
+                axios.post("https://siwes-logbook-backend.onrender.com/student/fetch-detailed", { instituition_id: schoolCred?.id })
                     .then((students) => {
                         setStudentList(students?.data?.message || [])
                     })

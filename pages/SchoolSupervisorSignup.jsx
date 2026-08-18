@@ -70,7 +70,7 @@ const SchoolSupervisorSignup = () => {
         }
     }
 
-    axios.post('http://localhost:5687/school/supervisor/signup', {
+    axios.post('https://siwes-logbook-backend.onrender.com/school/supervisor/signup', {
       Email_Address: emailAddress,
       password: password,
       Contact_Adress: contactAddress,
@@ -93,7 +93,7 @@ const SchoolSupervisorSignup = () => {
     if (!emailAddress) return showAlert("Please enter your email address first.");
     setOtpLoading(true);
     try {
-        await axios.post("http://localhost:5687/auth/otp/send", { email_address: emailAddress });
+        await axios.post("https://siwes-logbook-backend.onrender.com/auth/otp/send", { email_address: emailAddress });
         showAlert("OTP sent to your email!");
         setIsOtpSent(true);
     } catch (err) {
@@ -107,7 +107,7 @@ const SchoolSupervisorSignup = () => {
     if (!otpCode) return showAlert("Please enter the OTP code.");
     setOtpLoading(true);
     try {
-        await axios.post("http://localhost:5687/auth/otp/verify", { email_address: emailAddress, otp_code: otpCode });
+        await axios.post("https://siwes-logbook-backend.onrender.com/auth/otp/verify", { email_address: emailAddress, otp_code: otpCode });
         showAlert("Email verified successfully!");
         setIsOtpVerified(true);
     } catch (err) {

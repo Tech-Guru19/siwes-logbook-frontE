@@ -20,7 +20,7 @@ const SchoolSignin = () => {
         e.preventDefault()
         if (!mail || !password) return showAlert("Please fill in all parameters")
         setIsLoading(true)
-        axios.post("http://localhost:5687/school/signin", {
+        axios.post("https://siwes-logbook-backend.onrender.com/school/signin", {
             email_address: mail,
             password
         })

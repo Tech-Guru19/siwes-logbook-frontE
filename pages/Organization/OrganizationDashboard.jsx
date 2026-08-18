@@ -3,8 +3,9 @@ import { context } from '../../src/App'
 import Logo from '../../src/components/Logo'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { Building2, ClipboardCheck, Users, IdCard, LogOut, UserCheck, Check, X, Save, UserPlus, Edit3, Trash2, ShieldCheck, ChevronRight, Menu } from 'lucide-react'
+import { Building2, ClipboardCheck, Users, IdCard, LogOut, UserCheck, Check, X, Save, UserPlus, Edit3, Trash2, ShieldCheck, ChevronRight, Menu, Download, Upload, Search } from 'lucide-react'
 import { useDialog } from '../../src/context/DialogContext'
+import { exportToExcel, parseExcelFile } from '../../src/utils/excelUtils'
 
 const OrganizationDashboard = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -25,6 +26,8 @@ const OrganizationDashboard = () => {
     const [supFocus, setSupFocus] = useState('')
     const [isEditingSup, setIsEditingSup] = useState(false)
     const [editingSupId, setEditingSupId] = useState(null)
+    const [searchTerm, setSearchTerm] = useState('')
+    const fileInputRef = React.useRef(null)
 
     const fetchSingleStudentDetail = (studentId) => {
         navigate(`/student-performance/${studentId}`)
@@ -42,7 +45,7 @@ const OrganizationDashboard = () => {
 
     const fetchPlacements = () => {
         if (!organizationCred?.id) return
-        axios.post('http://localhost:5687/organization/placements/fetch', { organizationId: organizationCred?.id })
+        axios.post('https://siwes-logbook-backend.onrender.com/organization/placements/fetch', { organizationId: organizationCred?.id })
             .then((res) => {
                 setPlacements(res?.data?.message || [])
             })
@@ -51,7 +54,7 @@ const OrganizationDashboard = () => {
 
     const fetchAcceptedInterns = () => {
         if (!organizationCred?.id) return
-        axios.post('http://localhost:5687/student/fetch-detailed', { organization_id: organizationCred?.id })
+        axios.post('https://siwes-logbook-backend.onrender.com/student/fetch-detailed', { organization_id: organizationCred?.id })
             .then((res) => {
                 setAcceptedInterns(res?.data?.message || [])
             })
@@ -60,7 +63,7 @@ const OrganizationDashboard = () => {
 
     const fetchSupervisors = () => {
         if (!organizationCred?.id) return
-        axios.post('http://localhost:5687/organization/fetch/supervisor', { id: organizationCred?.id })
+        axios.post('https://siwes-logbook-backend.onrender.com/organization/fetch/supervisor', { id: organizationCred?.id })
             .then((res) => {
                 setSupervisors(res?.data?.message || [])
             })
@@ -68,7 +71,7 @@ const OrganizationDashboard = () => {
     }
 
     const handlePlacementStatus = (placementId, status) => {
-        axios.post('http://localhost:5687/organization/placements/status', {
+        axios.post('https://siwes-logbook-backend.onrender.com/organization/placements/status', {
             placementId,
             status
         })
@@ -83,7 +86,7 @@ const OrganizationDashboard = () => {
     }
 
     const handleAssignSupervisor = (studentId, supervisorId) => {
-        axios.post('http://localhost:5687/organization/assign-supervisor', {
+        axios.post('https://siwes-logbook-backend.onrender.com/organization/assign-supervisor', {
             studentId,
             supervisorId
         })
@@ -101,7 +104,7 @@ const OrganizationDashboard = () => {
         if (!supName || !supEmail) return showAlert('Please enter supervisor name and email')
 
         if (isEditingSup) {
-            axios.post('http://localhost:5687/organization-supervisor/update', {
+            axios.post('https://siwes-logbook-backend.onrender.com/organization-supervisor/update', {
                 id: editingSupId,
                 Full_Name: supName,
                 Email_Address: supEmail,
@@ -117,7 +120,7 @@ const OrganizationDashboard = () => {
             })
             .catch((err) => showAlert(err?.response?.data?.message || 'Error updating supervisor'))
         } else {
-            axios.post('http://localhost:5687/organization/create/supervisor', {
+            axios.post('https://siwes-logbook-backend.onrender.com/organization/create/supervisor', {
                 Organization_Id: organizationCred?.id,
                 Organization_Mail: organizationCred?.Email_Address,
                 department: supDept,
@@ -163,13 +166,68 @@ const OrganizationDashboard = () => {
     const handleDeleteSup = async (id) => {
         const confirm = await showConfirm('Are you sure you want to delete this supervisor?')
         if (!confirm) return
-        axios.post('http://localhost:5687/organization-supervisor/delete', { id })
+        axios.post('https://siwes-logbook-backend.onrender.com/organization-supervisor/delete', { id })
             .then(() => {
                 showAlert('Supervisor deleted')
                 fetchSupervisors()
             })
             .catch((err) => showAlert(err?.response?.data?.message || 'Error deleting supervisor'))
     }
+    const handleExport = () => {
+        if (supervisors.length === 0) return showAlert("No supervisors to export");
+        const exportData = supervisors.map(s => ({
+            "Full Name": s.Full_Name,
+            "Email Address": s.Email_Address,
+            "Department": s.department || '',
+            "Contact Address": s.Contact_Adress || '',
+            "Intern Capacity": s.capacity || 5,
+            "Focus Areas": s.focus_areas || ''
+        }));
+        exportToExcel(exportData, "Industry_Supervisors");
+    };
+
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+            const data = await parseExcelFile(file);
+            if (data.length === 0) return showAlert("The uploaded file is empty.");
+            
+            // Expected columns: Full Name, Email Address
+            const parsedSupervisors = data.map(row => ({
+                Full_Name: row["Full Name"] || row.Full_Name || row.FullName,
+                Email_Address: row["Email Address"] || row.email_address || row.Email || row.Email_Address,
+                department: row["Department"] || row.department,
+                Contact_Adress: row["Contact Address"] || row.Contact_Adress || row.ContactAddress,
+                capacity: row["Intern Capacity"] || row.capacity || row.Intern_Capacity || 5,
+                focus_areas: row["Focus Areas"] || row.focus_areas || row.FocusAreas
+            })).filter(s => s.Full_Name && s.Email_Address);
+            
+            if (parsedSupervisors.length === 0) return showAlert("Could not find valid supervisor data. Please check the columns.");
+            
+            axios.post("https://siwes-logbook-backend.onrender.com/organization/create/supervisor/batch", {
+                supervisors: parsedSupervisors,
+                Organization_Id: organizationCred?.id,
+                Organization_Mail: organizationCred?.Email_Address
+            }).then((res) => {
+                showAlert(res.data.message);
+                fetchSupervisors();
+            }).catch(err => {
+                showAlert(err?.response?.data?.message || "Error during batch upload");
+            });
+        } catch (err) {
+            showAlert("Error parsing the file. Please ensure it's a valid Excel/CSV file.");
+        } finally {
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        }
+    };
+
+    const filteredSupervisors = supervisors?.filter(sup => 
+        sup.Full_Name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        sup.Email_Address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        sup.department?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
 
     return (
         <div className="flex bg-[#FDFDFB] min-h-screen font-sans selection:bg-primary/20 text-slate-600">
@@ -520,6 +578,16 @@ const OrganizationDashboard = () => {
                                         </button>
                                     </div>
                                 </form>
+                                
+                                {!isEditingSup && (
+                                    <div className="mt-8 p-4 bg-blue-50 border border-blue-100 rounded-xl flex gap-3 text-sm text-blue-800">
+                                        <div className="shrink-0 mt-0.5"><Upload className="w-4 h-4 text-blue-600" /></div>
+                                        <div>
+                                            <p className="font-bold mb-1">Batch Import Guidelines</p>
+                                            <p className="font-light">Upload an Excel (.xlsx, .xls) or CSV file. Ensure your file contains headers exactly matching: <strong>Full Name, Email Address, Department, Contact Address, Intern Capacity, Focus Areas</strong>. Empty rows are ignored.</p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -530,11 +598,36 @@ const OrganizationDashboard = () => {
                                     <h3 className="text-2xl font-serif text-slate-900">Industry Supervisors</h3>
                                     <p className="text-slate-500 font-light mt-1">Directory of registered organizational supervisors.</p>
                                 </div>
-                                <span className="text-[10px] uppercase tracking-widest font-bold px-4 py-2 bg-blue-50 text-blue-600 rounded-full shadow-sm">{supervisors.length} Registered</span>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-[10px] uppercase tracking-widest font-bold px-4 py-2 bg-blue-50 text-blue-600 rounded-full shadow-sm">{supervisors.length} Registered</span>
+                                </div>
+                            </div>
+                            
+                            {/* Toolbar: Search, Export, Import */}
+                            <div className="flex flex-col lg:flex-row gap-4 justify-between items-center bg-slate-50 p-4 rounded-[1.5rem] border border-slate-100 mb-8">
+                                <div className="relative w-full lg:w-96">
+                                    <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                                    <input 
+                                        type="text" 
+                                        placeholder="Search supervisors..." 
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="w-full h-12 pl-12 pr-4 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none text-slate-800"
+                                    />
+                                </div>
+                                <div className="flex gap-3 w-full lg:w-auto">
+                                    <button onClick={handleExport} className="flex-1 lg:flex-none h-12 px-6 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                                        <Download className="w-4 h-4" /> Export
+                                    </button>
+                                    <button onClick={() => fileInputRef.current?.click()} className="flex-1 lg:flex-none h-12 px-6 bg-emerald-50 border border-emerald-100 text-emerald-600 font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-emerald-100 transition-colors flex items-center justify-center gap-2">
+                                        <Upload className="w-4 h-4" /> Batch Import
+                                    </button>
+                                    <input type="file" accept=".xlsx, .xls, .csv" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                {supervisors.map((s) => (
+                                {filteredSupervisors.map((s) => (
                                     <div key={s.id} className="p-8 bg-slate-50 border border-slate-100 rounded-[2rem] flex flex-col justify-between hover:shadow-md hover:-translate-y-1 transition-all group relative overflow-hidden">
                                         <div className="absolute top-6 right-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button onClick={() => handleEditSup(s)} className="w-8 h-8 flex items-center justify-center text-blue-600 bg-white border border-slate-200 hover:border-primary hover:text-primary rounded-lg shadow-sm transition-colors" title="Edit">

@@ -87,7 +87,7 @@ const SchoolSignup2 = () => {
                 otp_code: data?.otpCode
             }
 
-            axios.post("http://localhost:5687/school/signup", payload)
+            axios.post("https://siwes-logbook-backend.onrender.com/school/signup", payload)
                 .then((res) => {
                     showAlert("Institution account registered successfully!")
                     setSchoolCred(payload)

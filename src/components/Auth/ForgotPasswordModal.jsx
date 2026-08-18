@@ -20,7 +20,7 @@ const ForgotPasswordModal = ({ isOpen, onClose, role }) => {
         
         setLoading(true);
         try {
-            await axios.post('http://localhost:5687/auth/password/reset/send-otp', {
+            await axios.post('https://siwes-logbook-backend.onrender.com/auth/password/reset/send-otp', {
                 email,
                 role
             });
@@ -48,7 +48,7 @@ const ForgotPasswordModal = ({ isOpen, onClose, role }) => {
         
         setLoading(true);
         try {
-            await axios.post('http://localhost:5687/auth/password/reset/update', {
+            await axios.post('https://siwes-logbook-backend.onrender.com/auth/password/reset/update', {
                 email,
                 role,
                 newPassword,
