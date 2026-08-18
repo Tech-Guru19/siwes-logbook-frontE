@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Eye, EyeOff } from 'lucide-react';
 
 const AdminSignin = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,7 +17,7 @@ const AdminSignin = () => {
         setLoading(true);
 
         try {
-            const res = await axios.post('https://siwes-logbook-backend.onrender.com/admin/login', {
+            const res = await axios.post('http://localhost:5687/admin/login', {
                 email,
                 password
             });

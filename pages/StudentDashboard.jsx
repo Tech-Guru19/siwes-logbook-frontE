@@ -89,7 +89,7 @@ const StudentDashboard = () => {
   }, [studentCred]);
 
   const fetchDetailedProfile = () => {
-    axios.post("https://siwes-logbook-backend.onrender.com/student/fetch-detailed", { student_id: studentCred?.id })
+    axios.post("http://localhost:5687/student/fetch-detailed", { student_id: studentCred?.id })
       .then((res) => {
         if (res?.data?.message?.length > 0) {
           setDetailedProfile(res.data.message[0]);
@@ -99,19 +99,19 @@ const StudentDashboard = () => {
   };
 
   const fetchLeaves = () => {
-    axios.post("https://siwes-logbook-backend.onrender.com/leave/fetch/student", { student_id: studentCred?.id })
+    axios.post("http://localhost:5687/leave/fetch/student", { student_id: studentCred?.id })
       .then((res) => setLeaveRequests(res?.data?.message || []))
       .catch((err) => console.log(err));
   };
 
   const fetchLogs = () => {
-    axios.post("https://siwes-logbook-backend.onrender.com/user/student/logbook/fetch", { student_id: studentCred?.id })
+    axios.post("http://localhost:5687/user/student/logbook/fetch", { student_id: studentCred?.id })
       .then((res) => setLogs(res?.data?.message || []))
       .catch((err) => console.log(err));
   };
 
   const fetchPlacements = () => {
-    axios.post("https://siwes-logbook-backend.onrender.com/organization/placements/fetch", { student_id: studentCred?.id })
+    axios.post("http://localhost:5687/organization/placements/fetch", { student_id: studentCred?.id })
       .then((res) => {
         setPlacements(res?.data?.message || []);
       })
@@ -120,7 +120,7 @@ const StudentDashboard = () => {
 
   const handleSearchChange = (value) => {
     setSearchQuery(value);
-    axios.post("https://siwes-logbook-backend.onrender.com/organization/search", { query: value })
+    axios.post("http://localhost:5687/organization/search", { query: value })
       .then((res) => {
         setOrganizations(res?.data?.message || []);
       })
@@ -137,7 +137,7 @@ const StudentDashboard = () => {
     e.preventDefault();
     if (!selectedOrg) return showAlert("Please select a company to apply");
 
-    axios.post("https://siwes-logbook-backend.onrender.com/user/student/placement/apply", {
+    axios.post("http://localhost:5687/user/student/placement/apply", {
       student_id: studentCred?.id,
       organization_id: selectedOrg.id
     })

@@ -24,7 +24,7 @@ const Support = () => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      const response = await axios.post('https://siwes-logbook-backend.onrender.com/support/ticket', ticketData);
+      const response = await axios.post('http://localhost:5687/support/ticket', ticketData);
       if (response.data.success) {
         setToast({ show: true, message: 'Ticket submitted successfully! Our team will contact you shortly.', type: 'success' });
         setTicketData({ ...ticketData, subject: '', description: '' });

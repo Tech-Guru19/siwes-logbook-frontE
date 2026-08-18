@@ -14,7 +14,7 @@ const BankDetailsModal = ({ profile, onClose, onSuccess }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post("https://siwes-logbook-backend.onrender.com/user/student/update-details", {
+      await axios.post("http://localhost:5687/user/student/update-details", {
         student_id: profile.student_id,
         bank_name: bankName,
         account_number: accountNumber,

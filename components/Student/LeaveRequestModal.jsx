@@ -16,7 +16,7 @@ const LeaveRequestModal = ({ profile, onClose, onSuccess }) => {
     
     setLoading(true);
     try {
-      await axios.post("https://siwes-logbook-backend.onrender.com/leave/request", {
+      await axios.post("http://localhost:5687/leave/request", {
         student_id: profile.student_id,
         start_date: startDate,
         end_date: endDate,

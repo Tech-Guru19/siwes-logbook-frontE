@@ -19,21 +19,21 @@ const SchoolDashboard = () => {
         if (!schoolCred) return navigate("/register/accountType")
 
         // Fetch Students
-        axios.post("https://siwes-logbook-backend.onrender.com/school/fetch/student", { id: schoolCred?.id })
+        axios.post("http://localhost:5687/school/fetch/student", { id: schoolCred?.id })
             .then((res) => {
                 setStudentList(res?.data?.message || [])
             })
             .catch((err) => console.log(err))
 
         // Fetch Departments
-        axios.post("https://siwes-logbook-backend.onrender.com/school/register/department/fetch", { id: schoolCred?.id })
+        axios.post("http://localhost:5687/school/register/department/fetch", { id: schoolCred?.id })
             .then((res) => {
                 setSchoolDepartments(res?.data?.message || [])
             })
             .catch((err) => console.log(err))
 
         // Fetch Supervisors
-        axios.post("https://siwes-logbook-backend.onrender.com/school/fetch/supervisor", { id: schoolCred?.id })
+        axios.post("http://localhost:5687/school/fetch/supervisor", { id: schoolCred?.id })
             .then((res) => {
                 setSchoolSupervisors(res?.data?.message || [])
             })

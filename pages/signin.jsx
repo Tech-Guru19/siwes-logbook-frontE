@@ -4,6 +4,7 @@ import { context } from "../src/App";
 import axios from "axios";
 import { ArrowLeft, Mail, Lock, LogIn, Eye, EyeOff } from 'lucide-react';
 import { useDialog } from "../src/context/DialogContext";
+import ForgotPasswordModal from "../src/components/Auth/ForgotPasswordModal";
 
 const Signin = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -12,12 +13,13 @@ const Signin = () => {
   const { setStudentCred } = useContext(context);
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
+  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
 
   const handleSignin = (e) => {
     e.preventDefault();
     if (!emailAddress || !password) return showAlert("Please enter email address and password");
 
-    axios.post("https://siwes-logbook-backend.onrender.com/user/student/signin", {
+    axios.post("http://localhost:5687/user/student/signin", {
       email_address: emailAddress,
       password: password
     })
@@ -72,7 +74,16 @@ const Signin = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Password</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-xs font-semibold uppercase tracking-widest text-slate-400">Password</label>
+                <button 
+                  type="button" 
+                  onClick={() => setIsForgotModalOpen(true)}
+                  className="text-xs font-bold text-primary hover:text-slate-900 transition-colors"
+                >
+                  Forgot Password?
+                </button>
+              </div>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" strokeWidth={1.5} />
                 <input
@@ -101,14 +112,12 @@ const Signin = () => {
             </button>
 
             <div className="text-center pt-6 border-t border-slate-100 mt-8">
-              <p className="text-sm text-slate-500 font-light">
-                Not activated yet?{' '}
-                <Link to="/signup" className="text-primary font-medium hover:text-secondary-fixed-dim transition-colors">
-                  Register Here
-                </Link>
+              <p className="text-center text-sm font-medium text-slate-500 mt-6">
+                New here? <Link to="/register/student" className="text-primary font-bold hover:underline underline-offset-4">Create Student Account</Link>
               </p>
             </div>
           </form>
+          <ForgotPasswordModal isOpen={isForgotModalOpen} onClose={() => setIsForgotModalOpen(false)} role="student" />
         </div>
       </div>
 

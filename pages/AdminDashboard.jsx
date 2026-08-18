@@ -37,20 +37,20 @@ const AdminDashboard = () => {
     const fetchAllData = async () => {
         setLoading(true);
         try {
-            const statsRes = await axios.get('https://siwes-logbook-backend.onrender.com/admin/dashboard-stats');
+            const statsRes = await axios.get('http://localhost:5687/admin/dashboard-stats');
             setStats(statsRes.data.message);
 
-            const studentsRes = await axios.post('https://siwes-logbook-backend.onrender.com/admin/fetch-all', { type: 'students' });
+            const studentsRes = await axios.post('http://localhost:5687/admin/fetch-all', { type: 'students' });
             setStudents(studentsRes.data.message);
 
-            const schoolsRes = await axios.post('https://siwes-logbook-backend.onrender.com/admin/fetch-all', { type: 'schools' });
+            const schoolsRes = await axios.post('http://localhost:5687/admin/fetch-all', { type: 'schools' });
             setSchools(schoolsRes.data.message);
 
-            const orgsRes = await axios.post('https://siwes-logbook-backend.onrender.com/admin/fetch-all', { type: 'organizations' });
+            const orgsRes = await axios.post('http://localhost:5687/admin/fetch-all', { type: 'organizations' });
             setOrganizations(orgsRes.data.message);
 
             try {
-                const ticketsRes = await axios.get('https://siwes-logbook-backend.onrender.com/admin/tickets');
+                const ticketsRes = await axios.get('http://localhost:5687/admin/tickets');
                 setTickets(ticketsRes.data.message);
             } catch (err) { console.error("Error fetching tickets", err); }
 
@@ -65,7 +65,7 @@ const AdminDashboard = () => {
         const confirm = await showConfirm("Mark this ticket as resolved?");
         if (!confirm) return;
         try {
-            await axios.post('https://siwes-logbook-backend.onrender.com/admin/tickets/resolve', { id });
+            await axios.post('http://localhost:5687/admin/tickets/resolve', { id });
             showAlert("Ticket resolved successfully.");
             fetchAllData();
         } catch (error) {
@@ -79,7 +79,7 @@ const AdminDashboard = () => {
         if (!confirm) return;
         
         try {
-            await axios.post('https://siwes-logbook-backend.onrender.com/admin/delete', { type, id });
+            await axios.post('http://localhost:5687/admin/delete', { type, id });
             showAlert("Record deleted successfully.");
             fetchAllData();
         } catch (error) {
@@ -103,7 +103,7 @@ const AdminDashboard = () => {
         e.preventDefault();
         setSubmitting(true);
         try {
-            await axios.post('https://siwes-logbook-backend.onrender.com/admin/update', { 
+            await axios.post('http://localhost:5687/admin/update', { 
                 type: editType, 
                 id: editId, 
                 data: editData 

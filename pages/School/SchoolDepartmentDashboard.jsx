@@ -26,7 +26,7 @@ const SchoolDepartmentDashboard = () => {
         if (!departmentName || !facultyName || !HODName) return showAlert("Please fill in all inputs")
         
         if (isEditing) {
-            axios.post("https://siwes-logbook-backend.onrender.com/school/department/update", {
+            axios.post("http://localhost:5687/school/department/update", {
                 id: editingId,
                 departmentName,
                 facultyName,
@@ -46,7 +46,7 @@ const SchoolDepartmentDashboard = () => {
                 showAlert(err?.response?.data?.message || "Error updating department")
             })
         } else {
-            axios.post("https://siwes-logbook-backend.onrender.com/school/register/department", {
+            axios.post("http://localhost:5687/school/register/department", {
                 departmentName,
                 instituitionId: schoolCred?.id,
                 facultyName,
@@ -89,7 +89,7 @@ const SchoolDepartmentDashboard = () => {
     const handleDeleteClick = async (id) => {
         const confirm = await showConfirm("Are you sure you want to delete this department?")
         if (!confirm) return
-        axios.post("https://siwes-logbook-backend.onrender.com/school/department/delete", { id })
+        axios.post("http://localhost:5687/school/department/delete", { id })
             .then(() => {
                 setSchoolDepartments(prev => prev.filter(d => d.id !== id))
                 showAlert("Department deleted successfully")

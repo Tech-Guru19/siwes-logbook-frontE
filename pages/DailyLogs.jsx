@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { context } from "../src/App";
 import axios from "axios";
 import { uploadImg } from "../Cloudinary";
-import { GraduationCap, LayoutDashboard, FileEdit, LogOut, User, AlertTriangle, Edit2, PlusCircle, UploadCloud, Trash2, RefreshCw, Save, Send, History, Image as ImageIcon, CheckCircle, CalendarDays, Menu, X } from "lucide-react";
+import { GraduationCap, LayoutDashboard, FileEdit, LogOut, User, AlertTriangle, Edit2, PlusCircle, UploadCloud, Trash2, RefreshCw, Save, Send, History, Image as ImageIcon, CheckCircle, CalendarDays, Menu, X, Clock } from "lucide-react";
 import { useDialog } from "../src/context/DialogContext";
 
 const DailyLogs = () => {
@@ -94,7 +94,7 @@ const DailyLogs = () => {
       navigate("/register/accountType");
       return;
     }
-    axios.post("https://siwes-logbook-backend.onrender.com/user/student/profile", { id: studentCred?.id })
+    axios.post("http://localhost:5687/user/student/profile", { id: studentCred?.id })
       .then((res) => {
         setProfile(res?.data?.message || null);
       })
@@ -104,7 +104,7 @@ const DailyLogs = () => {
 
   const fetchLogs = () => {
     if (!studentCred?.id) return;
-    axios.post("https://siwes-logbook-backend.onrender.com/user/student/logbook/fetch", {
+    axios.post("http://localhost:5687/user/student/logbook/fetch", {
       student_id: studentCred?.id
     })
     .then((res) => {
@@ -158,7 +158,7 @@ const DailyLogs = () => {
       }
 
       if (isEditing) {
-        await axios.post("https://siwes-logbook-backend.onrender.com/user/student/logbook/update", {
+        await axios.post("http://localhost:5687/user/student/logbook/update", {
           id: editingLogId,
           activity_description: activityDescription,
           image_attachment: uploadedUrl || null
@@ -167,7 +167,7 @@ const DailyLogs = () => {
         resetForm();
         fetchLogs();
       } else {
-        await axios.post("https://siwes-logbook-backend.onrender.com/user/student/logbook/create", {
+        await axios.post("http://localhost:5687/user/student/logbook/create", {
           student_id: studentCred?.id,
           date: entryDate,
           week_number: weekNumber,
@@ -211,7 +211,7 @@ const DailyLogs = () => {
   const handleDeleteClick = async (id) => {
     const confirm = await showConfirm("Are you sure you want to delete this logbook entry?");
     if (!confirm) return;
-    axios.post("https://siwes-logbook-backend.onrender.com/user/student/logbook/delete", { id })
+    axios.post("http://localhost:5687/user/student/logbook/delete", { id })
       .then(() => {
         showAlert("Log entry deleted");
         fetchLogs();

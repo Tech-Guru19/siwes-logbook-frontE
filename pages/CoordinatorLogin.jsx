@@ -1,5 +1,7 @@
 import React, { useState } from "react";
+import ForgotPasswordModal from "../src/components/Auth/ForgotPasswordModal";
 const CoordinatorLogin = () => {
+  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   return (
     <>
@@ -106,12 +108,13 @@ const CoordinatorLogin = () => {
                       Remember me
                     </span>
                   </label>
-                  <a
+                  <button
+                    type="button"
+                    onClick={() => setIsForgotModalOpen(true)}
                     className="font-label-md text-label-md text-primary hover:underline"
-                    href="#"
                   >
                     Forgot password?
-                  </a>
+                  </button>
                 </div>
                 <button
                   className="w-full h-[40px] bg-primary text-on-primary font-label-md text-label-md rounded-xl hover:bg-primary-container transition-colors active:scale-[0.98] transform flex items-center justify-center gap-sm shadow-sm"
@@ -126,6 +129,7 @@ const CoordinatorLogin = () => {
                   </span>
                 </button>
               </form>
+              <ForgotPasswordModal isOpen={isForgotModalOpen} onClose={() => setIsForgotModalOpen(false)} role="school" />
               <div className="pt-md border-t border-outline-variant flex flex-col gap-md">
                 <p className="font-label-md text-label-md text-on-surface-variant uppercase text-center tracking-widest">
                   Switch Portal

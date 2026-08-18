@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { context } from '../../src/App'
 import { ArrowLeft, Mail, Lock, LogIn, Eye, EyeOff } from 'lucide-react';
 import { useDialog } from '../../src/context/DialogContext'
+import ForgotPasswordModal from '../../src/components/Auth/ForgotPasswordModal'
 
 const SchoolSignin = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -13,12 +14,13 @@ const SchoolSignin = () => {
     const [mail, setMail] = useState("")
     const [password, setpassword] = useState("")
     const [isLoading, setIsLoading] = useState(false)
+    const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
 
     const signin = (e) => {
         e.preventDefault()
         if (!mail || !password) return showAlert("Please fill in all parameters")
         setIsLoading(true)
-        axios.post("https://siwes-logbook-backend.onrender.com/school/signin", {
+        axios.post("http://localhost:5687/school/signin", {
             email_address: mail,
             password
         })
@@ -74,7 +76,16 @@ const SchoolSignin = () => {
                         </div>
 
                         <div>
-                            <label className="block text-xs font-semibold uppercase tracking-widest text-slate-400 mb-2">Password</label>
+                            <div className="flex items-center justify-between mb-2">
+                                <label className="block text-xs font-semibold uppercase tracking-widest text-slate-400">Password</label>
+                                <button 
+                                    type="button" 
+                                    onClick={() => setIsForgotModalOpen(true)}
+                                    className="text-xs font-bold text-primary hover:text-slate-900 transition-colors"
+                                >
+                                    Forgot Password?
+                                </button>
+                            </div>
                             <div className="relative">
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" strokeWidth={1.5} />
                                 <input
@@ -112,6 +123,7 @@ const SchoolSignin = () => {
                             </p>
                         </div>
                     </form>
+                    <ForgotPasswordModal isOpen={isForgotModalOpen} onClose={() => setIsForgotModalOpen(false)} role="school" />
                 </div>
             </div>
 

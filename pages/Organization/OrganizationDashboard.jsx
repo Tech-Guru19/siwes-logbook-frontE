@@ -42,7 +42,7 @@ const OrganizationDashboard = () => {
 
     const fetchPlacements = () => {
         if (!organizationCred?.id) return
-        axios.post('https://siwes-logbook-backend.onrender.com/organization/placements/fetch', { organizationId: organizationCred?.id })
+        axios.post('http://localhost:5687/organization/placements/fetch', { organizationId: organizationCred?.id })
             .then((res) => {
                 setPlacements(res?.data?.message || [])
             })
@@ -51,7 +51,7 @@ const OrganizationDashboard = () => {
 
     const fetchAcceptedInterns = () => {
         if (!organizationCred?.id) return
-        axios.post('https://siwes-logbook-backend.onrender.com/student/fetch-detailed', { organization_id: organizationCred?.id })
+        axios.post('http://localhost:5687/student/fetch-detailed', { organization_id: organizationCred?.id })
             .then((res) => {
                 setAcceptedInterns(res?.data?.message || [])
             })
@@ -60,7 +60,7 @@ const OrganizationDashboard = () => {
 
     const fetchSupervisors = () => {
         if (!organizationCred?.id) return
-        axios.post('https://siwes-logbook-backend.onrender.com/organization/fetch/supervisor', { id: organizationCred?.id })
+        axios.post('http://localhost:5687/organization/fetch/supervisor', { id: organizationCred?.id })
             .then((res) => {
                 setSupervisors(res?.data?.message || [])
             })
@@ -68,7 +68,7 @@ const OrganizationDashboard = () => {
     }
 
     const handlePlacementStatus = (placementId, status) => {
-        axios.post('https://siwes-logbook-backend.onrender.com/organization/placements/status', {
+        axios.post('http://localhost:5687/organization/placements/status', {
             placementId,
             status
         })
@@ -83,7 +83,7 @@ const OrganizationDashboard = () => {
     }
 
     const handleAssignSupervisor = (studentId, supervisorId) => {
-        axios.post('https://siwes-logbook-backend.onrender.com/organization/assign-supervisor', {
+        axios.post('http://localhost:5687/organization/assign-supervisor', {
             studentId,
             supervisorId
         })
@@ -101,7 +101,7 @@ const OrganizationDashboard = () => {
         if (!supName || !supEmail) return showAlert('Please enter supervisor name and email')
 
         if (isEditingSup) {
-            axios.post('https://siwes-logbook-backend.onrender.com/organization-supervisor/update', {
+            axios.post('http://localhost:5687/organization-supervisor/update', {
                 id: editingSupId,
                 Full_Name: supName,
                 Email_Address: supEmail,
@@ -117,7 +117,7 @@ const OrganizationDashboard = () => {
             })
             .catch((err) => showAlert(err?.response?.data?.message || 'Error updating supervisor'))
         } else {
-            axios.post('https://siwes-logbook-backend.onrender.com/organization/create/supervisor', {
+            axios.post('http://localhost:5687/organization/create/supervisor', {
                 Organization_Id: organizationCred?.id,
                 Organization_Mail: organizationCred?.Email_Address,
                 department: supDept,
@@ -163,7 +163,7 @@ const OrganizationDashboard = () => {
     const handleDeleteSup = async (id) => {
         const confirm = await showConfirm('Are you sure you want to delete this supervisor?')
         if (!confirm) return
-        axios.post('https://siwes-logbook-backend.onrender.com/organization-supervisor/delete', { id })
+        axios.post('http://localhost:5687/organization-supervisor/delete', { id })
             .then(() => {
                 showAlert('Supervisor deleted')
                 fetchSupervisors()

@@ -43,7 +43,7 @@ const SchoolSignup = () => {
         setOtpLoading(true);
         try {
             const { default: axios } = await import('axios');
-            await axios.post("https://siwes-logbook-backend.onrender.com/auth/otp/send", { email_address: Mail });
+            await axios.post("http://localhost:5687/auth/otp/send", { email_address: Mail });
             showAlert("OTP sent to your email!");
             setIsOtpSent(true);
         } catch (err) {
@@ -58,7 +58,7 @@ const SchoolSignup = () => {
         setOtpLoading(true);
         try {
             const { default: axios } = await import('axios');
-            await axios.post("https://siwes-logbook-backend.onrender.com/auth/otp/verify", { email_address: Mail, otp_code: otpCode });
+            await axios.post("http://localhost:5687/auth/otp/verify", { email_address: Mail, otp_code: otpCode });
             showAlert("Email verified successfully!");
             setIsOtpVerified(true);
         } catch (err) {

@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { context } from '../../src/App'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import Logo from '../../src/components/Logo'
 import user from '../../public/profile.png'
 import { BadgeInfo, LogOut, Edit3, Users, CalendarOff, BadgeCheck, UserCheck, FileSignature, X, Star, MessageSquare, CheckCircle2, GraduationCap, Building2, MapPin, Mail, Phone, BookOpen, Clock, Menu } from 'lucide-react'
 import { useDialog } from '../../src/context/DialogContext'
@@ -34,7 +35,7 @@ const OrgSupervisorDashboard = () => {
 
     const fetchAllLeaves = () => {
         if (!organizationSupervisorCred?.id) return
-        axios.post('https://siwes-logbook-backend.onrender.com/leave/fetch/org-supervisor-all', {
+        axios.post('http://localhost:5687/leave/fetch/org-supervisor-all', {
             org_supervisor_id: organizationSupervisorCred?.id
         })
         .then((res) => setAllLeaveRequests(res?.data?.message || []))
@@ -43,7 +44,7 @@ const OrgSupervisorDashboard = () => {
 
     const fetchInternLogbooks = () => {
         if (!organizationSupervisorCred?.id) return
-        axios.post('https://siwes-logbook-backend.onrender.com/user/student/logbook/fetch', {
+        axios.post('http://localhost:5687/user/student/logbook/fetch', {
             org_supervisor_id: organizationSupervisorCred?.id
         })
         .then((res) => {
@@ -54,7 +55,7 @@ const OrgSupervisorDashboard = () => {
 
     const fetchAssignedStudents = () => {
         if (!organizationSupervisorCred?.id) return
-        axios.post('https://siwes-logbook-backend.onrender.com/student/fetch-detailed', {
+        axios.post('http://localhost:5687/student/fetch-detailed', {
             organization_supervisor_id: organizationSupervisorCred?.id
         })
         .then((res) => {
@@ -67,7 +68,7 @@ const OrgSupervisorDashboard = () => {
         e.preventDefault()
         if (!selectedLog) return
 
-        axios.post('https://siwes-logbook-backend.onrender.com/org-supervisor/logbook/sign', {
+        axios.post('http://localhost:5687/org-supervisor/logbook/sign', {
             id: selectedLog.id,
             org_supervisor_id: organizationSupervisorCred?.id,
             org_supervisor_comment: comment,
@@ -88,7 +89,7 @@ const OrgSupervisorDashboard = () => {
     const handleLeaveAction = async (leave_id, status) => {
         if (!(await showConfirm(`Are you sure you want to ${status} this leave request?`))) return;
         try {
-            await axios.post('https://siwes-logbook-backend.onrender.com/leave/update-status', {
+            await axios.post('http://localhost:5687/leave/update-status', {
                 leave_id,
                 status,
                 org_supervisor_id: organizationSupervisorCred.id

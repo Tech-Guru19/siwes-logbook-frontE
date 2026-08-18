@@ -22,7 +22,7 @@ const OtpVerification = () => {
       const isSuperAdmin = location.state?.isSuperAdmin;
       
       if (isSuperAdmin) {
-        const res = await axios.post("https://siwes-logbook-backend.onrender.com/admin/verify-otp", {
+        const res = await axios.post("http://localhost:5687/admin/verify-otp", {
           email,
           otp
         });

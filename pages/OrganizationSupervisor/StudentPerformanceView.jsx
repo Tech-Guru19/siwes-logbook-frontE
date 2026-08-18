@@ -46,16 +46,16 @@ const StudentPerformanceView = () => {
 
     const fetchData = async () => {
         try {
-            const studentRes = await axios.post('https://siwes-logbook-backend.onrender.com/student/fetch-detailed', { student_id: id })
+            const studentRes = await axios.post('http://localhost:5687/student/fetch-detailed', { student_id: id })
             setStudent(studentRes.data.message[0])
 
-            const logsRes = await axios.post('https://siwes-logbook-backend.onrender.com/user/student/logbook/fetch', { student_id: id })
+            const logsRes = await axios.post('http://localhost:5687/user/student/logbook/fetch', { student_id: id })
             setLogbooks(logsRes.data.message || [])
 
-            const evalRes = await axios.post('https://siwes-logbook-backend.onrender.com/student/evaluation/fetch', { student_id: id })
+            const evalRes = await axios.post('http://localhost:5687/student/evaluation/fetch', { student_id: id })
             setEvaluation(evalRes.data.message || null)
 
-            const leaveRes = await axios.post('https://siwes-logbook-backend.onrender.com/leave/fetch/student', { student_id: id })
+            const leaveRes = await axios.post('http://localhost:5687/leave/fetch/student', { student_id: id })
             setLeaveRequests(leaveRes.data.message || [])
 
             setLoading(false)
@@ -89,7 +89,7 @@ const StudentPerformanceView = () => {
             gradeValue[evalForm.leadership_score];
 
         try {
-            await axios.post('https://siwes-logbook-backend.onrender.com/org-supervisor/evaluate', {
+            await axios.post('http://localhost:5687/org-supervisor/evaluate', {
                 student_id: id,
                 org_supervisor_id: organizationSupervisorCred.id,
                 ...evalForm,
@@ -107,7 +107,7 @@ const StudentPerformanceView = () => {
         const confirmResult = await showConfirm(`Are you sure you want to ${status} this leave request?`);
         if (!confirmResult) return;
         try {
-            await axios.post('https://siwes-logbook-backend.onrender.com/leave/update-status', {
+            await axios.post('http://localhost:5687/leave/update-status', {
                 leave_id,
                 status,
                 org_supervisor_id: organizationSupervisorCred.id

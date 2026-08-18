@@ -76,7 +76,7 @@ const OrganizationSignup = () => {
             }
         }
 
-        axios.post('https://siwes-logbook-backend.onrender.com/organization/signup', {
+        axios.post('http://localhost:5687/organization/signup', {
             Name: name,
             Email_Address: email,
             password: password,
@@ -101,7 +101,7 @@ const OrganizationSignup = () => {
         if (!email) return showAlert("Please enter the official email address first.");
         setOtpLoading(true);
         try {
-            await axios.post("https://siwes-logbook-backend.onrender.com/auth/otp/send", { email_address: email });
+            await axios.post("http://localhost:5687/auth/otp/send", { email_address: email });
             showAlert("OTP sent to your email!");
             setIsOtpSent(true);
         } catch (err) {
@@ -115,7 +115,7 @@ const OrganizationSignup = () => {
         if (!otpCode) return showAlert("Please enter the OTP code.");
         setOtpLoading(true);
         try {
-            await axios.post("https://siwes-logbook-backend.onrender.com/auth/otp/verify", { email_address: email, otp_code: otpCode });
+            await axios.post("http://localhost:5687/auth/otp/verify", { email_address: email, otp_code: otpCode });
             showAlert("Email verified successfully!");
             setIsOtpVerified(true);
         } catch (err) {
