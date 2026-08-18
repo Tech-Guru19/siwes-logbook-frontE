@@ -4,7 +4,7 @@ import { context } from '../../src/App'
 import Logo from '../../src/components/Logo'
 import user from '../../public/profile.png'
 import axios from 'axios'
-import { Building2, LayoutDashboard, GraduationCap, Users, Building, LogOut, ChevronRight, UserPlus, Edit3, Trash2, Filter, Download, Menu, X, Upload } from 'lucide-react'
+import { Building2, LayoutDashboard, GraduationCap, Users, Building, LogOut, ChevronRight, UserPlus, Edit3, Trash2, Filter, Download, Menu, X, Upload, Loader2 } from 'lucide-react'
 import { useDialog } from '../../src/context/DialogContext'
 import { parseExcelFile, exportToExcel } from '../../src/utils/excelUtils'
 
@@ -25,6 +25,8 @@ const SchoolStudentDashboard = () => {
     const [editingId, setEditingId] = useState(null)
     const [searchQuery, setSearchQuery] = useState("")
     const fileInputRef = React.useRef(null)
+    const [submitting, setSubmitting] = useState(false)
+    const [deletingId, setDeletingId] = useState(null)
 
     const handleOpenStudentDetails = (student) => {
         navigate(`/student-performance/${student.id}`)
@@ -63,6 +65,7 @@ const SchoolStudentDashboard = () => {
             return showAlert("Please fill in all parameters")
         }
 
+        setSubmitting(true)
         if (isEditing) {
             axios.post("https://siwes-logbook-backend.onrender.com/school/student/update", {
                 id: editingId,
@@ -89,6 +92,7 @@ const SchoolStudentDashboard = () => {
             .catch((err) => {
                 showAlert(err?.response?.data?.message || "Error updating student")
             })
+            .finally(() => setSubmitting(false))
         } else {
             axios.post("https://siwes-logbook-backend.onrender.com/school/register/student", {
                 Full_Name: fullName,
@@ -119,6 +123,7 @@ const SchoolStudentDashboard = () => {
             .catch((err) => {
                 showAlert(err?.response?.data?.message || "Error enrolling student")
             })
+            .finally(() => setSubmitting(false))
         }
     }
 
@@ -154,6 +159,7 @@ const SchoolStudentDashboard = () => {
     const handleDeleteClick = async (id) => {
         const confirm = await showConfirm("Are you sure you want to delete this student?")
         if (!confirm) return
+        setDeletingId(id)
         axios.post("https://siwes-logbook-backend.onrender.com/school/student/delete", { id })
             .then(() => {
                 setStudentList(prev => prev.filter(s => s.id !== id))
@@ -162,6 +168,7 @@ const SchoolStudentDashboard = () => {
             .catch((err) => {
                 showAlert(err?.response?.data?.message || "Error deleting student")
             })
+            .finally(() => setDeletingId(null))
     }
 
     const handleExport = () => {
@@ -176,6 +183,19 @@ const SchoolStudentDashboard = () => {
         }));
         exportToExcel(exportData, "Students_Export");
     }
+
+    const handleDownloadTemplate = () => {
+        const templateData = [{
+            "Full Name": "John Doe",
+            "Email Address": "john.doe@student.edu",
+            "Matric No": "MAT/2021/001",
+            "Department": "Computer Science",
+            "Start Date": "2024-01-10",
+            "End Date": "2024-06-10",
+            "Supervisor Email": "supervisor@school.edu"
+        }];
+        exportToExcel(templateData, "Student_Upload_Template");
+    };
 
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
@@ -362,11 +382,18 @@ const SchoolStudentDashboard = () => {
                             </div>
                             
                             {!isEditing && (
-                                <div className="mt-2 mb-2 p-4 bg-blue-50 border border-blue-100 rounded-xl flex gap-3 text-sm text-blue-800">
+                                <div className="mt-8 p-4 bg-blue-50 border border-blue-100 rounded-xl flex gap-3 text-sm text-blue-800">
                                     <div className="shrink-0 mt-0.5"><Upload className="w-4 h-4 text-blue-600" /></div>
-                                    <div>
+                                    <div className="flex-1">
                                         <p className="font-bold mb-1">Batch Import Guidelines</p>
-                                        <p className="font-light">Upload an Excel (.xlsx, .xls) or CSV file. Ensure your file contains headers exactly matching: <strong>Full Name, Email Address, Matric No, Department, Start Date, End Date, Supervisor Email</strong>. Empty rows are ignored.</p>
+                                        <p className="font-light mb-2">Upload an Excel (.xlsx, .xls) or CSV file. Ensure your file contains headers exactly matching: <strong>Full Name, Email Address, Matric No, Department, Start Date, End Date, Supervisor Email</strong>. Empty rows are ignored.</p>
+                                        <button 
+                                            type="button" 
+                                            onClick={handleDownloadTemplate} 
+                                            className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-primary hover:text-[#001530] transition-colors bg-white px-3 py-1.5 rounded-lg border border-blue-200 shadow-sm hover:shadow"
+                                        >
+                                            <Download className="w-3.5 h-3.5" /> Download Template
+                                        </button>
                                     </div>
                                 </div>
                             )}
@@ -385,8 +412,9 @@ const SchoolStudentDashboard = () => {
                                         <input type="file" accept=".xlsx, .xls, .csv" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
                                     </>
                                 )}
-                                <button onClick={handleSubmitStudent} className="px-8 h-12 bg-primary text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all">
-                                    {isEditing ? "Save Changes" : "Enroll Student"}
+                                <button onClick={handleSubmitStudent} disabled={submitting} className="px-8 h-12 bg-primary text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none flex items-center gap-2">
+                                    {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                                    {submitting ? "Saving..." : (isEditing ? "Save Changes" : "Enroll Student")}
                                 </button>
                             </div>
                         </div>
@@ -487,8 +515,8 @@ const SchoolStudentDashboard = () => {
                                                             <button onClick={() => handleEditClick(student)} className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-primary hover:border-primary hover:shadow-sm flex items-center justify-center transition-all" title="Edit">
                                                                 <Edit3 className="w-4 h-4" />
                                                             </button>
-                                                            <button onClick={() => handleDeleteClick(student.id)} className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 hover:shadow-sm flex items-center justify-center transition-all" title="Delete">
-                                                                <Trash2 className="w-4 h-4" />
+                                                            <button onClick={() => handleDeleteClick(student.id)} disabled={deletingId === student.id} className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 hover:shadow-sm flex items-center justify-center transition-all disabled:opacity-50" title="Delete">
+                                                                {deletingId === student.id ? <Loader2 className="w-4 h-4 animate-spin text-rose-500" /> : <Trash2 className="w-4 h-4" />}
                                                             </button>
                                                         </div>
                                                     </td>

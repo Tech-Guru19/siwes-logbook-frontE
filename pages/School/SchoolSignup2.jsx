@@ -4,6 +4,7 @@ import { uploadImg } from '../../Cloudinary'
 import { context } from '../../src/App'
 import axios from 'axios'
 import { useDialog } from '../../src/context/DialogContext'
+import { Loader2 } from 'lucide-react'
 
 const SchoolSignup2 = () => {
     const navigate = useNavigate()
@@ -277,8 +278,11 @@ const SchoolSignup2 = () => {
                                 type="submit"
                                 disabled={isLoading}
                             >
-                                <span className="material-symbols-outlined text-sm">cloud_upload</span>
-                                {isLoading ? "Registering Institution..." : "Register Institution"}
+                                {isLoading ? (
+                                    <><Loader2 className="w-4 h-4 animate-spin" /> Registering Institution...</>
+                                ) : (
+                                    <><span className="material-symbols-outlined text-sm">cloud_upload</span> Register Institution</>
+                                )}
                             </button>
                         </form>
                     </div>

@@ -1,8 +1,17 @@
 import React, { useState } from "react";
 import ForgotPasswordModal from "../src/components/Auth/ForgotPasswordModal";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 const CoordinatorLogin = () => {
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setLoading(true);
+    // Simulate login for now as there's no actual logic yet
+    setTimeout(() => setLoading(false), 1500);
+  };
   return (
     <>
       <body className="bg-background text-on-background font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed">
@@ -58,7 +67,7 @@ const CoordinatorLogin = () => {
                   staff.
                 </p>
               </div>
-              <form className="flex flex-col gap-lg">
+              <form onSubmit={handleSubmit} className="flex flex-col gap-lg">
                 <div className="flex flex-col gap-md">
                   <div className="flex flex-col gap-xs">
                     <label
@@ -117,16 +126,18 @@ const CoordinatorLogin = () => {
                   </button>
                 </div>
                 <button
-                  className="w-full h-[40px] bg-primary text-on-primary font-label-md text-label-md rounded-xl hover:bg-primary-container transition-colors active:scale-[0.98] transform flex items-center justify-center gap-sm shadow-sm"
+                  className="w-full h-[40px] bg-primary text-on-primary font-label-md text-label-md rounded-xl hover:bg-primary-container transition-colors active:scale-[0.98] transform flex items-center justify-center gap-sm shadow-sm disabled:opacity-50"
                   type="submit"
+                  disabled={loading}
                 >
-                  Sign In
-                  <span
-                    className="material-symbols-outlined text-[18px]"
-                    data-icon="login"
-                  >
-                    login
-                  </span>
+                  {loading ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Signing In...</>
+                  ) : (
+                    <>
+                      Sign In
+                      <span className="material-symbols-outlined text-[18px]" data-icon="login">login</span>
+                    </>
+                  )}
                 </button>
               </form>
               <ForgotPasswordModal isOpen={isForgotModalOpen} onClose={() => setIsForgotModalOpen(false)} role="school" />

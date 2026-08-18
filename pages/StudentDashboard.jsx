@@ -8,7 +8,7 @@ import WeeklyTracker from "../components/Student/WeeklyTracker";
 import BankDetailsModal from "../components/Student/BankDetailsModal";
 import DocumentUploadModal from "../components/Student/DocumentUploadModal";
 import LeaveRequestModal from "../components/Student/LeaveRequestModal";
-import { LayoutDashboard, FileEdit, Building2, LogOut, Clock, Calendar, BookOpen, CheckCircle, Building, MapPin, Mail, UserPlus, TrendingUp, Landmark, UploadCloud, CalendarOff, X, Search, Menu } from "lucide-react";
+import { LayoutDashboard, FileEdit, Building2, LogOut, Clock, Calendar, BookOpen, CheckCircle, Building, MapPin, Mail, UserPlus, TrendingUp, Landmark, UploadCloud, CalendarOff, X, Search, Menu, Loader2 } from "lucide-react";
 import { useDialog } from "../src/context/DialogContext";
 
 const StudentDashboard = () => {
@@ -27,6 +27,7 @@ const StudentDashboard = () => {
   const [showBankModal, setShowBankModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [applyLoading, setApplyLoading] = useState(false);
 
   const getInternshipStatus = () => {
     if (!studentCred?.Start_Date || !studentCred?.End_Date) {
@@ -137,6 +138,7 @@ const StudentDashboard = () => {
     e.preventDefault();
     if (!selectedOrg) return showAlert("Please select a company to apply");
 
+    setApplyLoading(true);
     axios.post("https://siwes-logbook-backend.onrender.com/user/student/placement/apply", {
       student_id: studentCred?.id,
       organization_id: selectedOrg.id
@@ -148,7 +150,8 @@ const StudentDashboard = () => {
       setSearchQuery("");
       fetchPlacements();
     })
-    .catch((err) => showAlert(err?.response?.data?.message || "Error submitting application"));
+    .catch((err) => showAlert(err?.response?.data?.message || "Error submitting application"))
+    .finally(() => setApplyLoading(false));
   };
 
   return (
@@ -507,10 +510,10 @@ const StudentDashboard = () => {
                 <div className="flex gap-3">
                   <button
                     type="submit"
-                    disabled={!selectedOrg}
+                    disabled={!selectedOrg || applyLoading}
                     className="flex-1 h-12 bg-primary text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-[#001530] hover:shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:shadow-none"
                   >
-                    Submit
+                    {applyLoading ? <><Loader2 className="w-4 h-4 animate-spin inline mr-2" /> Submitting...</> : "Submit"}
                   </button>
                   <button
                     type="button"

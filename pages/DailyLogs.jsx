@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { context } from "../src/App";
 import axios from "axios";
 import { uploadImg } from "../Cloudinary";
-import { GraduationCap, LayoutDashboard, FileEdit, LogOut, User, AlertTriangle, Edit2, PlusCircle, UploadCloud, Trash2, RefreshCw, Save, Send, History, Image as ImageIcon, CheckCircle, CalendarDays, Menu, X, Clock } from "lucide-react";
+import { GraduationCap, LayoutDashboard, FileEdit, LogOut, User, AlertTriangle, Edit2, PlusCircle, UploadCloud, Trash2, Loader2, Save, Send, History, Image as ImageIcon, CheckCircle, CalendarDays, Menu, X, Clock } from "lucide-react";
 import { useDialog } from "../src/context/DialogContext";
 
 const DailyLogs = () => {
@@ -24,6 +24,7 @@ const DailyLogs = () => {
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
 
   const handleImageSelect = (file) => {
     if (!file) return;
@@ -211,12 +212,14 @@ const DailyLogs = () => {
   const handleDeleteClick = async (id) => {
     const confirm = await showConfirm("Are you sure you want to delete this logbook entry?");
     if (!confirm) return;
+    setDeletingId(id);
     axios.post("https://siwes-logbook-backend.onrender.com/user/student/logbook/delete", { id })
       .then(() => {
         showAlert("Log entry deleted");
         fetchLogs();
       })
-      .catch((err) => showAlert(err?.response?.data?.message || "Error deleting entry"));
+      .catch((err) => showAlert(err?.response?.data?.message || "Error deleting entry"))
+      .finally(() => setDeletingId(null));
   };
 
   return (
@@ -415,7 +418,7 @@ const DailyLogs = () => {
                   className="flex-1 h-14 bg-primary text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                 >
                   {uploading ? (
-                    <><RefreshCw className="w-4 h-4 animate-spin" /> Saving & Uploading...</>
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Saving & Uploading...</>
                   ) : (
                     isEditing ? <><Save className="w-4 h-4" /> Save Changes</> : <><Send className="w-4 h-4" /> Publish Log</>
                   )}
@@ -504,8 +507,8 @@ const DailyLogs = () => {
                       <button onClick={() => handleEditClick(log)} className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/10 rounded-xl transition-colors">
                         <Edit2 className="w-4 h-4" />
                       </button>
-                      <button onClick={() => handleDeleteClick(log.id)} className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-colors">
-                        <Trash2 className="w-4 h-4" />
+                      <button disabled={deletingId === log.id} onClick={() => handleDeleteClick(log.id)} className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-colors disabled:opacity-50">
+                        {deletingId === log.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                       </button>
                     </div>
                   )}

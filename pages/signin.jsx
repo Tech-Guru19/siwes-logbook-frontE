@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { context } from "../src/App";
 import axios from "axios";
-import { ArrowLeft, Mail, Lock, LogIn, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, LogIn, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useDialog } from "../src/context/DialogContext";
 import ForgotPasswordModal from "../src/components/Auth/ForgotPasswordModal";
 
@@ -14,11 +14,13 @@ const Signin = () => {
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSignin = (e) => {
     e.preventDefault();
     if (!emailAddress || !password) return showAlert("Please enter email address and password");
 
+    setLoading(true);
     axios.post("https://siwes-logbook-backend.onrender.com/user/student/signin", {
       email_address: emailAddress,
       password: password
@@ -31,6 +33,9 @@ const Signin = () => {
     })
     .catch((err) => {
       showAlert(err?.response?.data?.message || "Sign in failed. Check your credentials.");
+    })
+    .finally(() => {
+      setLoading(false);
     });
   };
 
@@ -105,10 +110,15 @@ const Signin = () => {
             </div>
 
             <button
-              className="w-full h-14 bg-primary text-white font-semibold uppercase tracking-widest text-xs rounded-xl flex items-center justify-center gap-3 hover:bg-[#001530] hover:shadow-[0_15px_30px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all duration-300 mt-4"
+              className="w-full h-14 bg-primary text-white font-semibold uppercase tracking-widest text-xs rounded-xl flex items-center justify-center gap-3 hover:bg-[#001530] hover:shadow-[0_15px_30px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all duration-300 mt-4 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
               type="submit"
+              disabled={loading}
             >
-              Sign In to Portal <LogIn className="w-4 h-4" strokeWidth={2} />
+              {loading ? (
+                <>Signing In <Loader2 className="w-4 h-4 animate-spin" /></>
+              ) : (
+                <>Sign In to Portal <LogIn className="w-4 h-4" strokeWidth={2} /></>
+              )}
             </button>
 
             <div className="text-center pt-6 border-t border-slate-100 mt-8">

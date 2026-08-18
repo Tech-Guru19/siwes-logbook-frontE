@@ -1,7 +1,15 @@
 import React from 'react';
-import { Search, Bell, HelpCircle, UserCircle, Info, ShieldCheck, Send } from "lucide-react";
+import { Search, Bell, HelpCircle, UserCircle, Info, ShieldCheck, Send, Loader2 } from "lucide-react";
 
 const SupervisionAcctRequest = () => {
+  const [loading, setLoading] = React.useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setTimeout(() => setLoading(false), 1500);
+  };
+
   return (
     <div className="bg-[#FDFDFB] min-h-screen flex flex-col font-sans selection:bg-primary/20 text-slate-600">
         <header className="fixed top-0 w-full bg-white/80 backdrop-blur-xl border-b border-slate-100 flex justify-between items-center px-6 lg:px-12 h-20 z-50 transition-all duration-200 ease-in-out">
@@ -65,7 +73,7 @@ const SupervisionAcctRequest = () => {
                   </p>
                 </div>
 
-                <form className="space-y-8">
+                <form onSubmit={handleSubmit} className="space-y-8">
                   <div>
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">
                       Full Name
@@ -149,11 +157,15 @@ const SupervisionAcctRequest = () => {
 
                   <div className="pt-8 border-t border-slate-100">
                     <button
-                      className="w-full h-14 bg-primary text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+                      className="w-full h-14 bg-primary text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
                       type="submit"
+                      disabled={loading}
                     >
-                      Submit Request
-                      <Send className="w-4 h-4" />
+                      {loading ? (
+                        <><Loader2 className="w-4 h-4 animate-spin" /> Submitting Request...</>
+                      ) : (
+                        <>Submit Request <Send className="w-4 h-4" /></>
+                      )}
                     </button>
                     <div className="mt-8 text-center">
                       <a

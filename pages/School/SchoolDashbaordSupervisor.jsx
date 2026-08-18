@@ -4,7 +4,7 @@ import Logo from '../../src/components/Logo'
 import { useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
 import user from '../../public/profile.png'
-import { Building2, LayoutDashboard, GraduationCap, Users, Building, LogOut, ChevronRight, UserPlus, Save, Plus, Edit3, Trash2, IdCard, Mail, UsersRound, Headset, Menu, X, Upload, Filter, Download } from 'lucide-react'
+import { Building2, LayoutDashboard, GraduationCap, Users, Building, LogOut, ChevronRight, UserPlus, Save, Plus, Edit3, Trash2, IdCard, Mail, UsersRound, Headset, Menu, X, Upload, Filter, Download, Loader2 } from 'lucide-react'
 import { useDialog } from '../../src/context/DialogContext'
 import { parseExcelFile, exportToExcel } from '../../src/utils/excelUtils'
 
@@ -20,6 +20,8 @@ const SchoolDashbaordSupervisor = () => {
     const [editingId, setEditingId] = useState(null)
     const [searchQuery, setSearchQuery] = useState("")
     const fileInputRef = React.useRef(null)
+    const [submitting, setSubmitting] = useState(false)
+    const [deletingId, setDeletingId] = useState(null)
 
     useEffect(() => {
         if (!schoolCred) return navigate("/register/accountType")
@@ -42,6 +44,7 @@ const SchoolDashbaordSupervisor = () => {
     const handleSubmitSupervisor = () => {
         if (!fullName || !emailAddress || !Department) return showAlert("Please fill in all parameters")
         
+        setSubmitting(true)
         if (isEditing) {
             axios.post("https://siwes-logbook-backend.onrender.com/school/supervisor/update", {
                 id: editingId,
@@ -62,6 +65,7 @@ const SchoolDashbaordSupervisor = () => {
             .catch((err) => {
                 showAlert(err?.response?.data?.message || "Error updating supervisor")
             })
+            .finally(() => setSubmitting(false))
         } else {
             axios.post("https://siwes-logbook-backend.onrender.com/school/register/supervisor", {
                 Full_Name: fullName,
@@ -84,6 +88,7 @@ const SchoolDashbaordSupervisor = () => {
             .catch((error) => {
                 showAlert(error?.response?.data?.message || "Error adding supervisor")
             })
+            .finally(() => setSubmitting(false))
         }
     }
 
@@ -111,6 +116,7 @@ const SchoolDashbaordSupervisor = () => {
     const handleDeleteClick = async (id) => {
         const confirm = await showConfirm("Are you sure you want to delete this supervisor?")
         if (!confirm) return
+        setDeletingId(id)
         axios.post("https://siwes-logbook-backend.onrender.com/school/supervisor/delete", { id })
             .then(() => {
                 setSchoolSupervisors(prev => prev.filter(s => s.id !== id))
@@ -119,6 +125,7 @@ const SchoolDashbaordSupervisor = () => {
             .catch((err) => {
                 showAlert(err?.response?.data?.message || "Error deleting supervisor")
             })
+            .finally(() => setDeletingId(null))
     }
 
     const handleExport = () => {
@@ -130,6 +137,15 @@ const SchoolDashbaordSupervisor = () => {
         }));
         exportToExcel(exportData, "Supervisors_Export");
     }
+
+    const handleDownloadTemplate = () => {
+        const templateData = [{
+            "Full Name": "Jane Smith",
+            "Email Address": "jane.smith@school.edu",
+            "Department": "Computer Science"
+        }];
+        exportToExcel(templateData, "School_Supervisor_Template");
+    };
 
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
@@ -288,9 +304,9 @@ const SchoolDashbaordSupervisor = () => {
                                     </div>
                                 </div>
                                 <div className="lg:col-span-3 flex flex-col gap-2">
-                                    <button onClick={handleSubmitSupervisor} className="w-full bg-primary text-white h-12 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all" >
-                                        {isEditing ? <Save className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                                        {isEditing ? "Save Changes" : "Add Supervisor"}
+                                    <button onClick={handleSubmitSupervisor} disabled={submitting} className="w-full bg-primary text-white h-12 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none" >
+                                        {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (isEditing ? <Save className="w-4 h-4" /> : <Plus className="w-4 h-4" />)}
+                                        {submitting ? "Saving..." : (isEditing ? "Save Changes" : "Add Supervisor")}
                                     </button>
                                     {!isEditing && (
                                         <button onClick={() => fileInputRef.current?.click()} className="w-full h-12 bg-emerald-50 text-emerald-600 font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-emerald-100 transition-colors flex items-center justify-center gap-2">
@@ -306,11 +322,18 @@ const SchoolDashbaordSupervisor = () => {
                                 </div>
                             </div>
                             {!isEditing && (
-                                <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-xl flex gap-3 text-sm text-blue-800">
+                                <div className="mt-8 p-4 bg-blue-50 border border-blue-100 rounded-xl flex gap-3 text-sm text-blue-800">
                                     <div className="shrink-0 mt-0.5"><Upload className="w-4 h-4 text-blue-600" /></div>
-                                    <div>
+                                    <div className="flex-1">
                                         <p className="font-bold mb-1">Batch Import Guidelines</p>
-                                        <p className="font-light">Upload an Excel (.xlsx, .xls) or CSV file. Ensure your file contains headers exactly matching: <strong>Full Name, Email Address, Department</strong>. Empty rows are ignored.</p>
+                                        <p className="font-light mb-2">Upload an Excel (.xlsx, .xls) or CSV file. Ensure your file contains headers exactly matching: <strong>Full Name, Email Address, Department</strong>. Empty rows are ignored.</p>
+                                        <button 
+                                            type="button" 
+                                            onClick={handleDownloadTemplate} 
+                                            className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-primary hover:text-[#001530] transition-colors bg-white px-3 py-1.5 rounded-lg border border-blue-200 shadow-sm hover:shadow"
+                                        >
+                                            <Download className="w-3.5 h-3.5" /> Download Template
+                                        </button>
                                     </div>
                                 </div>
                             )}
@@ -366,8 +389,8 @@ const SchoolDashbaordSupervisor = () => {
                                                     <button onClick={() => handleEditClick(sup)} className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-primary hover:border-primary hover:shadow-sm flex items-center justify-center transition-all" title="Edit">
                                                         <Edit3 className="w-3.5 h-3.5" />
                                                     </button>
-                                                    <button onClick={() => handleDeleteClick(sup.id)} className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 hover:shadow-sm flex items-center justify-center transition-all" title="Delete">
-                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                    <button onClick={() => handleDeleteClick(sup.id)} disabled={deletingId === sup.id} className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 hover:shadow-sm flex items-center justify-center transition-all disabled:opacity-50" title="Delete">
+                                                        {deletingId === sup.id ? <Loader2 className="w-3.5 h-3.5 animate-spin text-rose-500" /> : <Trash2 className="w-3.5 h-3.5" />}
                                                     </button>
                                                 </div>
                                                 <div className="flex flex-col items-center text-center gap-4 mb-6 pt-4">

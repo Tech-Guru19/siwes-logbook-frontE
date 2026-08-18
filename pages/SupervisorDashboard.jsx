@@ -4,7 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { context } from "../src/App";
 import axios from "axios";
 import user from "../public/profile.png";
-import { GraduationCap, Users, FileCheck, LogOut, ShieldCheck, PenTool, Clock, BookUser, ClipboardCheck, Award, X, Edit3, Menu } from "lucide-react";
+import { GraduationCap, Users, FileCheck, LogOut, ShieldCheck, PenTool, Clock, BookUser, ClipboardCheck, Award, X, Edit3, Menu, Loader2 } from "lucide-react";
 import { useDialog } from "../src/context/DialogContext";
 
 const SupervisorDashboard = () => {
@@ -18,6 +18,7 @@ const SupervisorDashboard = () => {
   const [selectedLog, setSelectedLog] = useState(null);
   const [grade, setGrade] = useState(85);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [submittingGrade, setSubmittingGrade] = useState(false);
 
   const handleOpenStudentDetails = (student) => {
     navigate(`/student-performance/${student.id}`);
@@ -57,6 +58,7 @@ const SupervisorDashboard = () => {
   const handleGradeSubmission = (e) => {
     e.preventDefault();
     if (!selectedLog) return;
+    setSubmittingGrade(true);
 
     axios.post("https://siwes-logbook-backend.onrender.com/school-supervisor/logbook/grade", {
       id: selectedLog.id,
@@ -68,7 +70,8 @@ const SupervisorDashboard = () => {
       setSelectedLog(null);
       fetchLogbooks();
     })
-    .catch((err) => showAlert(err?.response?.data?.message || "Error submitting grade"));
+    .catch((err) => showAlert(err?.response?.data?.message || "Error submitting grade"))
+    .finally(() => setSubmittingGrade(false));
   };
 
   const unsignedCount = logbooks.filter(l => !l.school_supervisor_grade).length;
@@ -392,8 +395,8 @@ const SupervisorDashboard = () => {
                 </div>
 
                 <div className="flex gap-3 pt-4 border-t border-slate-100">
-                  <button type="submit" className="flex-1 h-14 bg-primary text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
-                    <Award className="w-4 h-4" /> Save Grade
+                  <button type="submit" disabled={submittingGrade} className="flex-1 h-14 bg-primary text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none">
+                    {submittingGrade ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving Grade...</> : <><Award className="w-4 h-4" /> Save Grade</>}
                   </button>
                   <button type="button" onClick={() => setSelectedLog(null)} className="px-6 h-14 bg-slate-100 text-slate-600 font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-slate-200 transition-colors">
                     Cancel

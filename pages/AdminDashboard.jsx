@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Logo from '../src/components/Logo';
 import axios from 'axios';
 import { context } from '../src/App';
-import { Shield, LayoutDashboard, GraduationCap, Building2, Users, Headset, LogOut, ShieldCheck, Edit3, Trash2, X, Menu } from "lucide-react";
+import { Shield, LayoutDashboard, GraduationCap, Building2, Users, Headset, LogOut, ShieldCheck, Edit3, Trash2, X, Menu, Loader2 } from "lucide-react";
 import { useDialog } from '../src/context/DialogContext';
 
 const AdminDashboard = () => {
@@ -544,7 +544,7 @@ const AdminDashboard = () => {
                                     Cancel
                                 </button>
                                 <button type="submit" disabled={submitting} className="px-6 h-12 font-bold text-xs uppercase tracking-widest text-white bg-primary rounded-xl hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none">
-                                    {submitting ? 'Saving...' : 'Save Changes'}
+                                    {submitting ? <><Loader2 className="w-4 h-4 animate-spin inline mr-2" /> Saving...</> : 'Save Changes'}
                                 </button>
                             </div>
                         </form>

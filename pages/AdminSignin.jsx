@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 const AdminSignin = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -103,8 +103,11 @@ const AdminSignin = () => {
                         disabled={loading}
                         className="w-full py-3 bg-primary text-white font-bold rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 mt-4 shadow-sm"
                     >
-                        {loading ? 'Authenticating...' : 'Secure Login'}
-                        {!loading && <span className="material-symbols-outlined text-sm">arrow_forward</span>}
+                        {loading ? (
+                            <><Loader2 className="w-4 h-4 animate-spin" /> Authenticating...</>
+                        ) : (
+                            <>Secure Login <span className="material-symbols-outlined text-sm">arrow_forward</span></>
+                        )}
                     </button>
                 </form>
             </div>

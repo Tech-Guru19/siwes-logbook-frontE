@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { context } from "../src/App";
-import { Shield, Clock, ArrowLeft } from "lucide-react";
+import { Shield, Clock, ArrowLeft, Loader2 } from "lucide-react";
 
 const OtpVerification = () => {
   const location = useLocation();
@@ -95,7 +95,11 @@ const OtpVerification = () => {
                   className="w-full h-14 bg-primary text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all flex items-center justify-center disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                   type="button"
                 >
-                  {loading ? 'Verifying Code...' : 'Verify Identity'}
+                  {loading ? (
+                    <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Verifying Code...</>
+                  ) : (
+                    "Verify Identity"
+                  )}
                 </button>
                 <div className="flex flex-col items-center gap-4 pt-4 border-t border-slate-100">
                   <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">

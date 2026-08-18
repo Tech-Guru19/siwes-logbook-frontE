@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import Logo from '../../src/components/Logo'
 import user from '../../public/profile.png'
-import { BadgeInfo, LogOut, Edit3, Users, CalendarOff, BadgeCheck, UserCheck, FileSignature, X, Star, MessageSquare, CheckCircle2, GraduationCap, Building2, MapPin, Mail, Phone, BookOpen, Clock, Menu } from 'lucide-react'
+import { BadgeInfo, LogOut, Edit3, Users, CalendarOff, BadgeCheck, UserCheck, FileSignature, X, Star, MessageSquare, CheckCircle2, GraduationCap, Building2, MapPin, Mail, Phone, BookOpen, Clock, Menu, Loader2 } from 'lucide-react'
 import { useDialog } from '../../src/context/DialogContext'
 
 const OrgSupervisorDashboard = () => {
@@ -22,6 +22,8 @@ const OrgSupervisorDashboard = () => {
     const [selectedStudentLogs, setSelectedStudentLogs] = useState([])
     const [allLeaveRequests, setAllLeaveRequests] = useState([])
     const [activeTab, setActiveTab] = useState('logbooks')
+    const [signingOff, setSigningOff] = useState(false)
+    const [updatingLeave, setUpdatingLeave] = useState(null)
 
     useEffect(() => {
         if (!organizationSupervisorCred) {
@@ -68,6 +70,7 @@ const OrgSupervisorDashboard = () => {
         e.preventDefault()
         if (!selectedLog) return
 
+        setSigningOff(true)
         axios.post('https://siwes-logbook-backend.onrender.com/org-supervisor/logbook/sign', {
             id: selectedLog.id,
             org_supervisor_id: organizationSupervisorCred?.id,
@@ -84,10 +87,12 @@ const OrgSupervisorDashboard = () => {
         .catch((err) => {
             showAlert(err?.response?.data?.message || 'Sign-off failed.')
         })
+        .finally(() => setSigningOff(false))
     }
 
     const handleLeaveAction = async (leave_id, status) => {
         if (!(await showConfirm(`Are you sure you want to ${status} this leave request?`))) return;
+        setUpdatingLeave(leave_id);
         try {
             await axios.post('https://siwes-logbook-backend.onrender.com/leave/update-status', {
                 leave_id,
@@ -99,6 +104,8 @@ const OrgSupervisorDashboard = () => {
         } catch (error) {
             console.error(error);
             showAlert(error?.response?.data?.message || "Failed to update leave request");
+        } finally {
+            setUpdatingLeave(null);
         }
     }
 
@@ -423,16 +430,18 @@ const OrgSupervisorDashboard = () => {
                                         {req.status === 'pending' ? (
                                             <>
                                                 <button 
+                                                    disabled={updatingLeave === req.id}
                                                     onClick={() => handleLeaveAction(req.id, 'rejected')}
-                                                    className="px-6 py-3 bg-white text-rose-600 border border-rose-100 hover:bg-rose-50 text-xs font-bold uppercase tracking-widest rounded-xl transition-all"
+                                                    className="px-6 py-3 bg-white text-rose-600 border border-rose-100 hover:bg-rose-50 text-xs font-bold uppercase tracking-widest rounded-xl transition-all disabled:opacity-50"
                                                 >
-                                                    Reject
+                                                    {updatingLeave === req.id ? <Loader2 className="w-4 h-4 animate-spin inline mr-1" /> : null} Reject
                                                 </button>
                                                 <button 
+                                                    disabled={updatingLeave === req.id}
                                                     onClick={() => handleLeaveAction(req.id, 'approved')}
-                                                    className="px-6 py-3 bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100 hover:shadow-sm text-xs font-bold uppercase tracking-widest rounded-xl transition-all"
+                                                    className="px-6 py-3 bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100 hover:shadow-sm text-xs font-bold uppercase tracking-widest rounded-xl transition-all disabled:opacity-50"
                                                 >
-                                                    Approve
+                                                    {updatingLeave === req.id ? <Loader2 className="w-4 h-4 animate-spin inline mr-1" /> : null} Approve
                                                 </button>
                                             </>
                                         ) : (
@@ -508,10 +517,11 @@ const OrgSupervisorDashboard = () => {
                                 <div className="flex gap-3 pt-4 border-t border-slate-100">
                                     <button
                                         type="submit"
-                                        className="flex-1 h-14 bg-primary text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+                                        disabled={signingOff}
+                                        className="flex-1 h-14 bg-primary text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                                     >
-                                        <CheckCircle2 className="w-4 h-4" />
-                                        Confirm Sign-off
+                                        {signingOff ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                                        {signingOff ? 'Signing...' : 'Confirm Sign-off'}
                                     </button>
                                     <button
                                         type="button"

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Mail, Lock, Home, KeyRound, CheckCircle2, RefreshCw, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, Home, KeyRound, CheckCircle2, Loader2, Eye, EyeOff } from 'lucide-react';
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -131,7 +131,7 @@ const Signup = () => {
                     disabled={otpLoading || !personalEmail}
                     className="h-14 px-6 bg-primary/5 text-primary border border-primary/10 hover:bg-primary hover:text-white font-semibold uppercase tracking-widest text-xs rounded-xl transition-all duration-300 disabled:opacity-50 whitespace-nowrap flex items-center gap-2"
                   >
-                    {otpLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : null}
+                    {otpLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                     {isOtpSent ? "Resend" : "Get OTP"}
                   </button>
                 )}
@@ -159,7 +159,7 @@ const Signup = () => {
                     disabled={otpLoading || !otpCode}
                     className="h-14 px-8 bg-primary text-white font-semibold uppercase tracking-widest text-xs rounded-xl hover:bg-[#001530] transition-colors duration-300 disabled:opacity-50 flex items-center gap-2"
                   >
-                    {otpLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : null}
+                    {otpLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                     Verify
                   </button>
                 </div>
@@ -223,7 +223,7 @@ const Signup = () => {
               type="submit"
               disabled={loading || !isOtpVerified}
             >
-              {loading ? "Activating..." : "Activate Account"}
+              {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Activating...</> : "Activate Account"}
             </button>
 
             <div className="text-center pt-6 border-t border-slate-100 mt-8 pb-8">

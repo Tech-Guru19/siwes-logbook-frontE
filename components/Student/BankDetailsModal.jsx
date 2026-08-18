@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Landmark, X, Save } from "lucide-react";
+import { Landmark, X, Save, Loader2 } from "lucide-react";
 import { useDialog } from "../../src/context/DialogContext";
 
 const BankDetailsModal = ({ profile, onClose, onSuccess }) => {
@@ -85,7 +85,7 @@ const BankDetailsModal = ({ profile, onClose, onSuccess }) => {
               disabled={loading}
               className="w-full h-14 bg-primary text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-[#001530] hover:-translate-y-0.5 hover:shadow-[0_10px_20px_rgba(0,32,69,0.1)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:translate-y-0"
             >
-              {loading ? "Saving..." : "Save Details"}
+              {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : "Save Details"}
               {!loading && <Save className="w-4 h-4" />}
             </button>
           </div>

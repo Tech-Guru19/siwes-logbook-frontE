@@ -3,7 +3,7 @@ import { context } from '../../src/App'
 import Logo from '../../src/components/Logo'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { Building2, ClipboardCheck, Users, IdCard, LogOut, UserCheck, Check, X, Save, UserPlus, Edit3, Trash2, ShieldCheck, ChevronRight, Menu, Download, Upload, Search } from 'lucide-react'
+import { Building2, ClipboardCheck, Users, IdCard, LogOut, UserCheck, Check, X, Save, UserPlus, Edit3, Trash2, ShieldCheck, ChevronRight, Menu, Download, Upload, Search, Loader2 } from 'lucide-react'
 import { useDialog } from '../../src/context/DialogContext'
 import { exportToExcel, parseExcelFile } from '../../src/utils/excelUtils'
 
@@ -28,6 +28,10 @@ const OrganizationDashboard = () => {
     const [editingSupId, setEditingSupId] = useState(null)
     const [searchTerm, setSearchTerm] = useState('')
     const fileInputRef = React.useRef(null)
+    const [submittingSup, setSubmittingSup] = useState(false)
+    const [assigningStudent, setAssigningStudent] = useState(null)
+    const [updatingStatus, setUpdatingStatus] = useState(null)
+    const [deletingSupId, setDeletingSupId] = useState(null)
 
     const fetchSingleStudentDetail = (studentId) => {
         navigate(`/student-performance/${studentId}`)
@@ -71,6 +75,7 @@ const OrganizationDashboard = () => {
     }
 
     const handlePlacementStatus = (placementId, status) => {
+        setUpdatingStatus(placementId)
         axios.post('https://siwes-logbook-backend.onrender.com/organization/placements/status', {
             placementId,
             status
@@ -83,9 +88,11 @@ const OrganizationDashboard = () => {
         .catch((err) => {
             showAlert(err?.response?.data?.message || 'Error updating placement status')
         })
+        .finally(() => setUpdatingStatus(null))
     }
 
     const handleAssignSupervisor = (studentId, supervisorId) => {
+        setAssigningStudent(studentId)
         axios.post('https://siwes-logbook-backend.onrender.com/organization/assign-supervisor', {
             studentId,
             supervisorId
@@ -97,12 +104,14 @@ const OrganizationDashboard = () => {
         .catch((err) => {
             showAlert(err?.response?.data?.message || 'Error assigning supervisor')
         })
+        .finally(() => setAssigningStudent(null))
     }
 
     const handleSubmitSupervisor = (e) => {
         e.preventDefault()
         if (!supName || !supEmail) return showAlert('Please enter supervisor name and email')
 
+        setSubmittingSup(true)
         if (isEditingSup) {
             axios.post('https://siwes-logbook-backend.onrender.com/organization-supervisor/update', {
                 id: editingSupId,
@@ -119,6 +128,7 @@ const OrganizationDashboard = () => {
                 fetchSupervisors()
             })
             .catch((err) => showAlert(err?.response?.data?.message || 'Error updating supervisor'))
+            .finally(() => setSubmittingSup(false))
         } else {
             axios.post('https://siwes-logbook-backend.onrender.com/organization/create/supervisor', {
                 Organization_Id: organizationCred?.id,
@@ -136,6 +146,7 @@ const OrganizationDashboard = () => {
                 fetchSupervisors()
             })
             .catch((err) => showAlert(err?.response?.data?.message || 'Error creating supervisor'))
+            .finally(() => setSubmittingSup(false))
         }
     }
 
@@ -166,12 +177,14 @@ const OrganizationDashboard = () => {
     const handleDeleteSup = async (id) => {
         const confirm = await showConfirm('Are you sure you want to delete this supervisor?')
         if (!confirm) return
+        setDeletingSupId(id)
         axios.post('https://siwes-logbook-backend.onrender.com/organization-supervisor/delete', { id })
             .then(() => {
                 showAlert('Supervisor deleted')
                 fetchSupervisors()
             })
             .catch((err) => showAlert(err?.response?.data?.message || 'Error deleting supervisor'))
+            .finally(() => setDeletingSupId(null))
     }
     const handleExport = () => {
         if (supervisors.length === 0) return showAlert("No supervisors to export");
@@ -184,6 +197,18 @@ const OrganizationDashboard = () => {
             "Focus Areas": s.focus_areas || ''
         }));
         exportToExcel(exportData, "Industry_Supervisors");
+    };
+
+    const handleDownloadTemplate = () => {
+        const templateData = [{
+            "Full Name": "Jane Smith",
+            "Email Address": "jane.smith@company.com",
+            "Department": "Engineering",
+            "Contact Address": "123 Tech Lane, Silicon Valley",
+            "Intern Capacity": 5,
+            "Focus Areas": "Software Development, AI"
+        }];
+        exportToExcel(templateData, "Organization_Supervisor_Template");
     };
 
     const handleFileUpload = async (e) => {
@@ -381,16 +406,18 @@ const OrganizationDashboard = () => {
                                                     {(!p.status || p.status.toLowerCase() === 'pending') && (
                                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                             <button
+                                                                disabled={updatingStatus === p.id}
                                                                 onClick={() => handlePlacementStatus(p.id, 'Approved')}
-                                                                className="px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-100 text-xs font-bold rounded-xl hover:bg-emerald-600 hover:text-white transition-all flex items-center gap-1.5"
+                                                                className="px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-100 text-xs font-bold rounded-xl hover:bg-emerald-600 hover:text-white transition-all flex items-center gap-1.5 disabled:opacity-50"
                                                             >
-                                                                <Check className="w-4 h-4" /> Approve
+                                                                {updatingStatus === p.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />} Approve
                                                             </button>
                                                             <button
+                                                                disabled={updatingStatus === p.id}
                                                                 onClick={() => handlePlacementStatus(p.id, 'Rejected')}
-                                                                className="px-4 py-2 bg-rose-50 text-rose-600 border border-rose-100 text-xs font-bold rounded-xl hover:bg-rose-600 hover:text-white transition-all flex items-center gap-1.5"
+                                                                className="px-4 py-2 bg-rose-50 text-rose-600 border border-rose-100 text-xs font-bold rounded-xl hover:bg-rose-600 hover:text-white transition-all flex items-center gap-1.5 disabled:opacity-50"
                                                             >
-                                                                <X className="w-4 h-4" /> Reject
+                                                                {updatingStatus === p.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />} Reject
                                                             </button>
                                                         </div>
                                                     )}
@@ -476,13 +503,14 @@ const OrganizationDashboard = () => {
                                                     </td>
                                                     <td className="px-6 py-5 pr-8 text-right">
                                                         <button
+                                                            disabled={assigningStudent === student.id}
                                                             onClick={() => {
                                                                 const selectEl = document.getElementById(`supervisor-select-${student.id}`);
                                                                 handleAssignSupervisor(student.id, selectEl?.value);
                                                             }}
-                                                            className="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-1.5 inline-flex"
+                                                            className="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-1.5 inline-flex disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
                                                         >
-                                                            <Save className="w-3.5 h-3.5" /> Assign
+                                                            {assigningStudent === student.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} Assign
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -572,9 +600,9 @@ const OrganizationDashboard = () => {
                                                 Cancel
                                             </button>
                                         )}
-                                        <button type="submit" className="flex-1 h-12 bg-primary text-white font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
-                                            {isEditingSup ? <Save className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
-                                            {isEditingSup ? 'Save Changes' : 'Register Supervisor'}
+                                        <button type="submit" disabled={submittingSup} className="flex-1 h-12 bg-primary text-white font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none">
+                                            {submittingSup ? <Loader2 className="w-4 h-4 animate-spin" /> : (isEditingSup ? <Save className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />)}
+                                            {submittingSup ? 'Saving...' : (isEditingSup ? 'Save Changes' : 'Register Supervisor')}
                                         </button>
                                     </div>
                                 </form>
@@ -582,9 +610,16 @@ const OrganizationDashboard = () => {
                                 {!isEditingSup && (
                                     <div className="mt-8 p-4 bg-blue-50 border border-blue-100 rounded-xl flex gap-3 text-sm text-blue-800">
                                         <div className="shrink-0 mt-0.5"><Upload className="w-4 h-4 text-blue-600" /></div>
-                                        <div>
+                                        <div className="flex-1">
                                             <p className="font-bold mb-1">Batch Import Guidelines</p>
-                                            <p className="font-light">Upload an Excel (.xlsx, .xls) or CSV file. Ensure your file contains headers exactly matching: <strong>Full Name, Email Address, Department, Contact Address, Intern Capacity, Focus Areas</strong>. Empty rows are ignored.</p>
+                                            <p className="font-light mb-2">Upload an Excel (.xlsx, .xls) or CSV file. Ensure your file contains headers exactly matching: <strong>Full Name, Email Address, Department, Contact Address, Intern Capacity, Focus Areas</strong>. Empty rows are ignored.</p>
+                                            <button 
+                                                type="button" 
+                                                onClick={handleDownloadTemplate} 
+                                                className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-primary hover:text-[#001530] transition-colors bg-white px-3 py-1.5 rounded-lg border border-blue-200 shadow-sm hover:shadow"
+                                            >
+                                                <Download className="w-3.5 h-3.5" /> Download Template
+                                            </button>
                                         </div>
                                     </div>
                                 )}
@@ -626,38 +661,62 @@ const OrganizationDashboard = () => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                {filteredSupervisors.map((s) => (
-                                    <div key={s.id} className="p-8 bg-slate-50 border border-slate-100 rounded-[2rem] flex flex-col justify-between hover:shadow-md hover:-translate-y-1 transition-all group relative overflow-hidden">
-                                        <div className="absolute top-6 right-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button onClick={() => handleEditSup(s)} className="w-8 h-8 flex items-center justify-center text-blue-600 bg-white border border-slate-200 hover:border-primary hover:text-primary rounded-lg shadow-sm transition-colors" title="Edit">
-                                                <Edit3 className="w-3.5 h-3.5" />
-                                            </button>
-                                            <button onClick={() => handleDeleteSup(s.id)} className="w-8 h-8 flex items-center justify-center text-rose-600 bg-white border border-slate-200 hover:border-rose-200 hover:bg-rose-50 rounded-lg shadow-sm transition-colors" title="Delete">
-                                                <Trash2 className="w-3.5 h-3.5" />
-                                            </button>
-                                        </div>
-                                        <div className="mb-6">
-                                            <h4 className="font-serif font-bold text-slate-900 text-xl leading-tight group-hover:text-primary transition-colors">{s.Full_Name}</h4>
-                                            <p className="text-sm text-slate-500 font-light mt-1 mb-4">{s.Email_Address}</p>
-                                            
-                                            <div className="flex flex-wrap gap-2 mt-4">
-                                                <span className="px-3 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-widest rounded-full border border-slate-200">{s.department}</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center justify-between pt-4 border-t border-slate-200">
-                                            <span className="text-xs text-slate-500 font-light">Capacity</span>
-                                            <span className="font-bold text-primary bg-primary/5 px-3 py-1 rounded-lg text-sm">{s.capacity || 5} Interns</span>
-                                        </div>
-                                    </div>
-                                ))}
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="border-b border-slate-100 bg-slate-50/50 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                                            <th className="px-6 py-5 pl-8">Full Name</th>
+                                            <th className="px-6 py-5">Email Address</th>
+                                            <th className="px-6 py-5">Department</th>
+                                            <th className="px-6 py-5">Capacity</th>
+                                            <th className="px-6 py-5 pr-8 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100 text-sm">
+                                        {filteredSupervisors.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="5" className="p-10 text-center text-slate-400 font-light text-lg">No industry supervisors found.</td>
+                                            </tr>
+                                        ) : (
+                                            filteredSupervisors.map((s) => (
+                                                <tr key={s.id} className="hover:bg-slate-50/50 transition-colors group">
+                                                    <td className="px-6 py-5 pl-8">
+                                                        <span className="font-bold text-slate-800 text-base">{s.Full_Name}</span>
+                                                    </td>
+                                                    <td className="px-6 py-5">
+                                                        <span className="font-medium text-slate-600">{s.Email_Address}</span>
+                                                    </td>
+                                                    <td className="px-6 py-5">
+                                                        <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold border border-slate-200 uppercase tracking-widest">{s.department || 'General'}</span>
+                                                    </td>
+                                                    <td className="px-6 py-5">
+                                                        <span className="font-bold text-primary bg-primary/5 px-3 py-1 rounded-lg text-sm">{s.capacity || 5} Interns</span>
+                                                    </td>
+                                                    <td className="px-6 py-5 pr-8 text-right">
+                                                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <button 
+                                                                onClick={() => handleEditSup(s)} 
+                                                                className="w-8 h-8 flex items-center justify-center text-blue-600 bg-white border border-slate-200 hover:border-primary hover:text-primary rounded-lg shadow-sm transition-colors" 
+                                                                title="Edit"
+                                                            >
+                                                                <Edit3 className="w-3.5 h-3.5" />
+                                                            </button>
+                                                            <button 
+                                                                disabled={deletingSupId === s.id}
+                                                                onClick={() => handleDeleteSup(s.id)} 
+                                                                className="w-8 h-8 flex items-center justify-center text-rose-600 bg-white border border-slate-200 hover:border-rose-200 hover:bg-rose-50 rounded-lg shadow-sm transition-colors disabled:opacity-50" 
+                                                                title="Delete"
+                                                            >
+                                                                {deletingSupId === s.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
                             </div>
-                            
-                            {supervisors.length === 0 && (
-                                <div className="p-10 text-center text-slate-400 font-light text-lg border border-dashed border-slate-200 rounded-[2rem] bg-slate-50">
-                                    No industry supervisors registered yet.
-                                </div>
-                            )}
                         </div>
                     </section>
                 )}

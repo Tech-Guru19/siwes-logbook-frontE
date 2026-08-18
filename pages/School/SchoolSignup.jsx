@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, Mail as MailIcon, Lock, Building, KeyRound, CheckCircle2, RefreshCw, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Mail as MailIcon, Lock, Building, KeyRound, CheckCircle2, Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { useDialog } from '../../src/context/DialogContext'
 
 const SchoolSignup = () => {
@@ -132,7 +132,7 @@ const SchoolSignup = () => {
                                         disabled={otpLoading || !Mail}
                                         className="h-14 px-6 bg-primary/5 text-primary border border-primary/10 hover:bg-primary hover:text-white font-semibold uppercase tracking-widest text-xs rounded-xl transition-all duration-300 disabled:opacity-50 whitespace-nowrap flex items-center gap-2"
                                     >
-                                        {otpLoading ? <RefreshCw className="w-4 h-4 animate-spin"/> : null}
+                                        {otpLoading ? <Loader2 className="w-4 h-4 animate-spin"/> : null}
                                         {isOtpSent ? "Resend" : "Get OTP"}
                                     </button>
                                 )}
@@ -160,7 +160,7 @@ const SchoolSignup = () => {
                                         disabled={otpLoading || !otpCode}
                                         className="h-14 px-8 bg-primary text-white font-semibold uppercase tracking-widest text-xs rounded-xl hover:bg-[#001530] transition-colors duration-300 disabled:opacity-50 flex items-center gap-2"
                                     >
-                                        {otpLoading ? <RefreshCw className="w-4 h-4 animate-spin"/> : null}
+                                        {otpLoading ? <Loader2 className="w-4 h-4 animate-spin"/> : null}
                                         Verify
                                     </button>
                                 </div>

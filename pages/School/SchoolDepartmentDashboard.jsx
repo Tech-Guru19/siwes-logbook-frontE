@@ -4,7 +4,7 @@ import Logo from '../../src/components/Logo'
 import { useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
 import user from '../../public/profile.png'
-import { Building2, LayoutDashboard, GraduationCap, Users, Building, LogOut, ChevronRight, FolderPlus, Save, PlusCircle, Filter, Download, Edit3, Trash2, Menu, X, Upload } from 'lucide-react'
+import { Building2, LayoutDashboard, GraduationCap, Users, Building, LogOut, ChevronRight, FolderPlus, Save, PlusCircle, Filter, Download, Edit3, Trash2, Menu, X, Upload, Loader2 } from 'lucide-react'
 import { useDialog } from '../../src/context/DialogContext'
 import { parseExcelFile, exportToExcel } from '../../src/utils/excelUtils'
 
@@ -20,6 +20,8 @@ const SchoolDepartmentDashboard = () => {
     const [editingId, setEditingId] = useState(null)
     const [searchQuery, setSearchQuery] = useState("")
     const fileInputRef = React.useRef(null)
+    const [submitting, setSubmitting] = useState(false)
+    const [deletingId, setDeletingId] = useState(null)
 
     useEffect(() => {
         if (!schoolCred) return navigate("/register/accountType")
@@ -28,6 +30,7 @@ const SchoolDepartmentDashboard = () => {
     const handleSubmitDepartment = () => {
         if (!departmentName || !facultyName || !HODName) return showAlert("Please fill in all inputs")
         
+        setSubmitting(true)
         if (isEditing) {
             axios.post("https://siwes-logbook-backend.onrender.com/school/department/update", {
                 id: editingId,
@@ -48,6 +51,7 @@ const SchoolDepartmentDashboard = () => {
             .catch((err) => {
                 showAlert(err?.response?.data?.message || "Error updating department")
             })
+            .finally(() => setSubmitting(false))
         } else {
             axios.post("https://siwes-logbook-backend.onrender.com/school/register/department", {
                 departmentName,
@@ -69,6 +73,7 @@ const SchoolDepartmentDashboard = () => {
             .catch((error) => {
                 showAlert(error?.response?.data?.message || "Error adding department")
             })
+            .finally(() => setSubmitting(false))
         }
     }
 
@@ -92,6 +97,7 @@ const SchoolDepartmentDashboard = () => {
     const handleDeleteClick = async (id) => {
         const confirm = await showConfirm("Are you sure you want to delete this department?")
         if (!confirm) return
+        setDeletingId(id)
         axios.post("https://siwes-logbook-backend.onrender.com/school/department/delete", { id })
             .then(() => {
                 setSchoolDepartments(prev => prev.filter(d => d.id !== id))
@@ -100,6 +106,7 @@ const SchoolDepartmentDashboard = () => {
             .catch((err) => {
                 showAlert(err?.response?.data?.message || "Error deleting department")
             })
+            .finally(() => setDeletingId(null))
     }
 
     const handleExport = () => {
@@ -111,6 +118,15 @@ const SchoolDepartmentDashboard = () => {
         }));
         exportToExcel(exportData, "Departments_Export");
     }
+
+    const handleDownloadTemplate = () => {
+        const templateData = [{
+            "Department Name": "Computer Science",
+            "Faculty Name": "Faculty of Science",
+            "HOD Name": "Dr. Alan Turing"
+        }];
+        exportToExcel(templateData, "Department_Upload_Template");
+    };
 
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
@@ -263,9 +279,9 @@ const SchoolDepartmentDashboard = () => {
                                     <input value={HODName} onChange={(e) => { setHODName(e.target.value) }} className="h-12 bg-slate-50 border border-slate-200 rounded-xl px-4 text-sm font-medium focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all outline-none text-slate-800" placeholder="Full name of HOD" type="text" />
                                 </div>
                                 <div className="flex flex-col justify-end gap-3">
-                                    <button onClick={handleSubmitDepartment} className="w-full h-12 bg-primary text-white font-bold text-xs uppercase tracking-widest rounded-xl shadow-sm hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
-                                        {isEditing ? <Save className="w-4 h-4" /> : <PlusCircle className="w-4 h-4" />}
-                                        {isEditing ? "Save Changes" : "Create Dept"}
+                                    <button onClick={handleSubmitDepartment} disabled={submitting} className="w-full h-12 bg-primary text-white font-bold text-xs uppercase tracking-widest rounded-xl shadow-sm hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none">
+                                        {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : (isEditing ? <Save className="w-4 h-4" /> : <PlusCircle className="w-4 h-4" />)}
+                                        {submitting ? "Saving..." : (isEditing ? "Save Changes" : "Create Dept")}
                                     </button>
                                     {!isEditing && (
                                         <button onClick={() => fileInputRef.current?.click()} className="w-full h-12 bg-emerald-50 text-emerald-600 font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-emerald-100 transition-colors flex items-center justify-center gap-2">
@@ -281,11 +297,18 @@ const SchoolDepartmentDashboard = () => {
                                 </div>
                             </div>
                             {!isEditing && (
-                                <div className="mt-6 p-4 bg-blue-50 border border-blue-100 rounded-xl flex gap-3 text-sm text-blue-800">
+                                <div className="mt-8 p-4 bg-blue-50 border border-blue-100 rounded-xl flex gap-3 text-sm text-blue-800">
                                     <div className="shrink-0 mt-0.5"><Upload className="w-4 h-4 text-blue-600" /></div>
-                                    <div>
+                                    <div className="flex-1">
                                         <p className="font-bold mb-1">Batch Import Guidelines</p>
-                                        <p className="font-light">Upload an Excel (.xlsx, .xls) or CSV file. Ensure your file contains headers exactly matching: <strong>Department Name, Faculty Name, HOD Name</strong>. Empty rows are ignored.</p>
+                                        <p className="font-light mb-2">Upload an Excel (.xlsx, .xls) or CSV file. Ensure your file contains headers exactly matching: <strong>Department Name, Faculty Name, HOD Name</strong>. Empty rows are ignored.</p>
+                                        <button 
+                                            type="button" 
+                                            onClick={handleDownloadTemplate} 
+                                            className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-primary hover:text-[#001530] transition-colors bg-white px-3 py-1.5 rounded-lg border border-blue-200 shadow-sm hover:shadow"
+                                        >
+                                            <Download className="w-3.5 h-3.5" /> Download Template
+                                        </button>
                                     </div>
                                 </div>
                             )}
@@ -362,8 +385,8 @@ const SchoolDepartmentDashboard = () => {
                                                             <button onClick={() => handleEditClick(output)} className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-primary hover:border-primary hover:shadow-sm flex items-center justify-center transition-all" title="Edit">
                                                                 <Edit3 className="w-4 h-4" />
                                                             </button>
-                                                            <button onClick={() => handleDeleteClick(output.id)} className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 hover:shadow-sm flex items-center justify-center transition-all" title="Delete">
-                                                                <Trash2 className="w-4 h-4" />
+                                                            <button onClick={() => handleDeleteClick(output.id)} disabled={deletingId === output.id} className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 hover:shadow-sm flex items-center justify-center transition-all disabled:opacity-50" title="Delete">
+                                                                {deletingId === output.id ? <Loader2 className="w-4 h-4 animate-spin text-rose-500" /> : <Trash2 className="w-4 h-4" />}
                                                             </button>
                                                         </div>
                                                     </td>

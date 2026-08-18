@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { uploadImg } from '../../Cloudinary'
-import { ArrowLeft, Mail, Lock, KeyRound, CheckCircle2, RefreshCw, UploadCloud, X, MapPin, BadgeCheck, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, KeyRound, CheckCircle2, Loader2, UploadCloud, X, MapPin, BadgeCheck, Eye, EyeOff } from 'lucide-react';
 import { useDialog } from '../../src/context/DialogContext'
 
 const OrgSupervisorSignup = () => {
@@ -170,7 +170,7 @@ const OrgSupervisorSignup = () => {
                                         disabled={otpLoading || !email}
                                         className="h-14 px-6 bg-primary/5 text-primary border border-primary/10 hover:bg-primary hover:text-white font-semibold uppercase tracking-widest text-xs rounded-xl transition-all duration-300 disabled:opacity-50 whitespace-nowrap flex items-center gap-2"
                                     >
-                                        {otpLoading ? <RefreshCw className="w-4 h-4 animate-spin"/> : null}
+                                        {otpLoading ? <Loader2 className="w-4 h-4 animate-spin"/> : null}
                                         {isOtpSent ? "Resend" : "Get OTP"}
                                     </button>
                                 )}
@@ -198,7 +198,7 @@ const OrgSupervisorSignup = () => {
                                         disabled={otpLoading || !otpCode}
                                         className="h-14 px-8 bg-primary text-white font-semibold uppercase tracking-widest text-xs rounded-xl hover:bg-[#001530] transition-colors duration-300 disabled:opacity-50 flex items-center gap-2"
                                     >
-                                        {otpLoading ? <RefreshCw className="w-4 h-4 animate-spin"/> : null}
+                                        {otpLoading ? <Loader2 className="w-4 h-4 animate-spin"/> : null}
                                         Verify
                                     </button>
                                 </div>
@@ -296,7 +296,7 @@ const OrgSupervisorSignup = () => {
                             disabled={loading || !isOtpVerified}
                         >
                             <BadgeCheck className="w-4 h-4" />
-                            {loading ? "Activating..." : "Activate Supervisor Profile"}
+                            {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Activating...</> : "Activate Supervisor Profile"}
                         </button>
 
                         <div className="text-center pt-6 border-t border-slate-100 mt-8 pb-8">

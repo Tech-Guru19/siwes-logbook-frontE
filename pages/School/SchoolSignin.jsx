@@ -2,7 +2,7 @@ import axios from 'axios'
 import React, { useContext, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { context } from '../../src/App'
-import { ArrowLeft, Mail, Lock, LogIn, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, LogIn, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useDialog } from '../../src/context/DialogContext'
 import ForgotPasswordModal from '../../src/components/Auth/ForgotPasswordModal'
 
@@ -111,7 +111,11 @@ const SchoolSignin = () => {
                             type="submit"
                             disabled={isLoading}
                         >
-                            {isLoading ? "Signing In..." : "Sign In to Portal"} <LogIn className="w-4 h-4" strokeWidth={2} />
+                            {isLoading ? (
+                                <>Signing In... <Loader2 className="w-4 h-4 animate-spin" /></>
+                            ) : (
+                                <>Sign In to Portal <LogIn className="w-4 h-4" strokeWidth={2} /></>
+                            )}
                         </button>
 
                         <div className="text-center pt-6 border-t border-slate-100 mt-8">
