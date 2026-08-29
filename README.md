@@ -1,69 +1,77 @@
-# 📋 SIWES Logbook — Frontend
+# SIWES Logbook - Frontend
 
-A modern, multi-role **SIWES Logbook & Performance Monitoring System** frontend built with React 19 and Vite. It powers students, schools, organizations, and supervisors through a single, role-aware dashboard experience.
+## Overview
 
-## ✨ Features
+A modern, multi-role SIWES Logbook and Performance Monitoring System frontend built with React 19 and Vite. The application provides a role-aware dashboard experience for students, school administrators, department heads, supervisors, organizations, and platform administrators, enabling digital recording and monitoring of industrial training (SIWES) activities.
 
-- 🔐 **Role-based authentication** — Students, School Admins, Department Heads, School Supervisors, Organization Supervisors, and Platform Admins each get a dedicated dashboard
-- 📝 **Daily logbook entries** — Students record daily SIWES activities with rich, structured forms
-- 📊 **Performance monitoring** — Interactive charts (Recharts) visualise student progress and log activity
-- 🏫 **School & department management** — Create schools, departments, and supervisors with a two-step onboarding flow
-- 🏢 **Organization management** — Assign supervisors to students and track placements
-- 📄 **Spreadsheet export** — Export student data to Excel via the XLSX library
-- ✅ **OTP verification** — Email OTP flows secure signups and sensitive actions
-- 🎨 **Modern UI** — Tailwind CSS 4 + shadcn-style components with Framer Motion animations
+## Key Features
 
-## 🧱 Tech Stack
+- **Role-based authentication:** Dedicated dashboards for students, school admins, department heads, school supervisors, organization supervisors, and platform administrators
+- **Daily logbook entries:** Structured forms for students to record daily SIWES training activities
+- **Performance monitoring:** Interactive charts built with Recharts to visualize student progress and log activity
+- **School and department management:** Two-step onboarding flow for creating schools, departments, and supervisors
+- **Organization management:** Supervisor assignment and placement tracking for organizations
+- **Data export:** Spreadsheet export of student data using the SheetJS (xlsx) library
+- **Email verification:** OTP-based verification for signups and sensitive operations
+- **Modern interface:** Tailwind CSS 4 with shadcn-style components and Framer Motion animations
+
+## Technology Stack
 
 | Layer | Technology |
 |---|---|
-| Framework | React 19 + Vite |
+| Framework | React 19, Vite |
 | Styling | Tailwind CSS 4, tw-animate-css, CVA |
 | Routing | React Router 7 |
 | Charts | Recharts |
-| HTTP | Axios |
+| HTTP Client | Axios |
 | Icons | Lucide React |
-| Animations | Framer Motion |
-| Export | SheetJS (xlsx) |
+| Animation | Framer Motion |
+| Data Export | SheetJS (xlsx) |
 
-## 🚀 Getting Started
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or later)
+- npm or yarn
+
+### Installation
 
 ```bash
-# 1. Clone the repo
 git clone https://github.com/Tech-Guru19/siwes-logbook-frontE.git
 cd siwes-logbook-frontE
-
-# 2. Install dependencies
 npm install
-
-# 3. Start the dev server
 npm run dev
 ```
 
-## 🔗 Backend
+The development server will start, typically at `http://localhost:5173`.
 
-This frontend talks to the [SIWES Logbook Backend](https://github.com/Tech-Guru19/siwes-logbook-backend-c) (Express + MySQL).
+### Production Build
 
-## 🗂️ Project Structure
+```bash
+npm run build
+```
+
+The compiled output is generated in the `dist/` directory.
+
+## Project Structure
 
 ```
 src/
-├── components/        # Reusable UI components (Auth, Student, etc.)
-├── context/           # Global state (credentials, lists)
-├── pages/             # All route pages
-│   ├── Organization/       # Organization dashboards
-│   ├── OrganizationSupervisor/
-│   ├── School/             # School, department & supervisor dashboards
-│   └── ...                 # Student, Admin, Support, Docs, etc.
-└── utils/
+├── components/                 # Reusable UI components (Auth, Student, etc.)
+├── context/                    # Global state management (credentials, lists)
+├── pages/                      # Application routes
+│   ├── Organization/           # Organization dashboards
+│   ├── OrganizationSupervisor/ # Organization supervisor views
+│   ├── School/                 # School, department and supervisor dashboards
+│   └── ...                     # Student, Admin, Support, Docs pages
+└── utils/                      # Utility functions
 ```
 
-## 📦 Build
+## Backend Integration
 
-```bash
-npm run build   # outputs to dist/
-```
+This frontend communicates with the [SIWES Logbook Backend](https://github.com/Tech-Guru19/siwes-logbook-backend-c), an Express and MySQL REST API.
 
-## 👩‍💻 Author
+## Author
 
-**[Obiasogu Esther Chizaram](https://github.com/Tech-Guru19)**
+[Obiasogu Esther Chizaram](https://github.com/Tech-Guru19)
