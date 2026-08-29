@@ -1,16 +1,69 @@
-# React + Vite
+# 📋 SIWES Logbook — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, multi-role **SIWES Logbook & Performance Monitoring System** frontend built with React 19 and Vite. It powers students, schools, organizations, and supervisors through a single, role-aware dashboard experience.
 
-Currently, two official plugins are available:
+## ✨ Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- 🔐 **Role-based authentication** — Students, School Admins, Department Heads, School Supervisors, Organization Supervisors, and Platform Admins each get a dedicated dashboard
+- 📝 **Daily logbook entries** — Students record daily SIWES activities with rich, structured forms
+- 📊 **Performance monitoring** — Interactive charts (Recharts) visualise student progress and log activity
+- 🏫 **School & department management** — Create schools, departments, and supervisors with a two-step onboarding flow
+- 🏢 **Organization management** — Assign supervisors to students and track placements
+- 📄 **Spreadsheet export** — Export student data to Excel via the XLSX library
+- ✅ **OTP verification** — Email OTP flows secure signups and sensitive actions
+- 🎨 **Modern UI** — Tailwind CSS 4 + shadcn-style components with Framer Motion animations
 
-## React Compiler
+## 🧱 Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Layer | Technology |
+|---|---|
+| Framework | React 19 + Vite |
+| Styling | Tailwind CSS 4, tw-animate-css, CVA |
+| Routing | React Router 7 |
+| Charts | Recharts |
+| HTTP | Axios |
+| Icons | Lucide React |
+| Animations | Framer Motion |
+| Export | SheetJS (xlsx) |
 
-## Expanding the ESLint configuration
+## 🚀 Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+# 1. Clone the repo
+git clone https://github.com/Tech-Guru19/siwes-logbook-frontE.git
+cd siwes-logbook-frontE
+
+# 2. Install dependencies
+npm install
+
+# 3. Start the dev server
+npm run dev
+```
+
+## 🔗 Backend
+
+This frontend talks to the [SIWES Logbook Backend](https://github.com/Tech-Guru19/siwes-logbook-backend-c) (Express + MySQL).
+
+## 🗂️ Project Structure
+
+```
+src/
+├── components/        # Reusable UI components (Auth, Student, etc.)
+├── context/           # Global state (credentials, lists)
+├── pages/             # All route pages
+│   ├── Organization/       # Organization dashboards
+│   ├── OrganizationSupervisor/
+│   ├── School/             # School, department & supervisor dashboards
+│   └── ...                 # Student, Admin, Support, Docs, etc.
+└── utils/
+```
+
+## 📦 Build
+
+```bash
+npm run build   # outputs to dist/
+```
+
+## 👩‍💻 Author
+
+**[Obiasogu Esther Chizaram](https://github.com/Tech-Guru19)**
