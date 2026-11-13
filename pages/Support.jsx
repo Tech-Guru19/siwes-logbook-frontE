@@ -1,50 +1,129 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, Search, HelpCircle, Send, AlertCircle, BookOpen, LifeBuoy } from "lucide-react";
+import { ArrowLeft, Search, Send, AlertCircle, BookOpen, User, Mail, Tag, FileText, CheckCircle2 } from "lucide-react";
 import { context } from '../src/App';
 
 const Support = () => {
   const navigate = useNavigate();
   const { studentCred, schoolSupervisorCred, organizationSupervisorCred, schoolCred, organizationCred } = useContext(context);
   
-  const isLoggedIn = studentCred || schoolSupervisorCred || organizationSupervisorCred || schoolCred || organizationCred;
+  const isLoggedIn = Boolean(studentCred || schoolSupervisorCred || organizationSupervisorCred || schoolCred || organizationCred);
+
+  const getInitialUserType = () => {
+    if (studentCred) return 'Student';
+    if (schoolSupervisorCred) return 'School Supervisor';
+    if (organizationSupervisorCred) return 'Organization Supervisor';
+    if (schoolCred) return 'School';
+    if (organizationCred) return 'Organization';
+    return 'Guest';
+  };
+
+  const getInitialEmail = () => {
+    return studentCred?.Email_Address || 
+           schoolSupervisorCred?.Email_Address || 
+           organizationSupervisorCred?.Email_Address || 
+           schoolCred?.Email_Address || 
+           schoolCred?.Mail || 
+           organizationCred?.Email_Address || 
+           organizationCred?.Mail || '';
+  };
+
+  const getInitialName = () => {
+    return studentCred?.Full_Name || 
+           schoolSupervisorCred?.Full_Name || 
+           organizationSupervisorCred?.Full_Name || 
+           schoolCred?.Instituition_Name || 
+           schoolCred?.Name || 
+           organizationCred?.Organization_Name || 
+           organizationCred?.Name || '';
+  };
 
   const [ticketData, setTicketData] = useState({
-    user_type: isLoggedIn ? (studentCred ? 'Student' : schoolCred ? 'School' : 'Supervisor') : 'Guest',
-    user_email: isLoggedIn ? (studentCred?.Email_Address || schoolCred?.Email_Address || '') : '',
+    name: getInitialName(),
+    user_type: getInitialUserType(),
+    user_email: getInitialEmail(),
     issue_type: 'Technical Issue',
     subject: '',
     description: ''
   });
+
+  useEffect(() => {
+    setTicketData(prev => ({
+      ...prev,
+      name: prev.name || getInitialName(),
+      user_type: prev.user_type === 'Guest' ? getInitialUserType() : prev.user_type,
+      user_email: prev.user_email || getInitialEmail()
+    }));
+  }, [studentCred, schoolSupervisorCred, organizationSupervisorCred, schoolCred, organizationCred]);
+
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
 
   const handleTicketSubmit = async (e) => {
     e.preventDefault();
+
+    if (!ticketData.subject.trim() || !ticketData.description.trim()) {
+      setToast({ show: true, message: 'Please provide both a subject and a description.', type: 'error' });
+      return;
+    }
+
+    if (!ticketData.user_email.trim()) {
+      setToast({ show: true, message: 'Please provide a valid contact email address.', type: 'error' });
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const response = await axios.post('https://siwes-logbook-backend.onrender.com/support/ticket', ticketData);
-      if (response.data.success) {
-        setToast({ show: true, message: 'Ticket submitted successfully! Our team will contact you shortly.', type: 'success' });
-        setTicketData({ ...ticketData, subject: '', description: '' });
+      const payload = {
+        name: ticketData.name || 'Anonymous User',
+        email: ticketData.user_email,
+        user_email: ticketData.user_email,
+        user_type: ticketData.user_type,
+        issue_type: ticketData.issue_type,
+        subject: ticketData.subject,
+        description: ticketData.description,
+        message: ticketData.description
+      };
+
+      const response = await axios.post('https://siwes-logbook-backend.onrender.com/support/ticket', payload);
+
+      if (response.data && (response.data.success || response.data.status === 'OK')) {
+        setToast({ 
+          show: true, 
+          message: 'Ticket submitted successfully! Our support team will get in touch with you shortly.', 
+          type: 'success' 
+        });
+        setTicketData(prev => ({ ...prev, subject: '', description: '' }));
+      } else {
+        setToast({ 
+          show: true, 
+          message: response.data?.message || 'Failed to submit ticket. Please try again.', 
+          type: 'error' 
+        });
       }
     } catch (error) {
-      setToast({ show: true, message: 'Failed to submit ticket. Please try again.', type: 'error' });
+      console.error("Support submission error:", error);
+      const errorMsg = error.response?.data?.message || error.message || 'Failed to submit ticket. Please check your network and try again.';
+      setToast({ show: true, message: errorMsg, type: 'error' });
     } finally {
       setSubmitting(false);
-      setTimeout(() => setToast({ show: false, message: '', type: '' }), 5000);
+      setTimeout(() => setToast({ show: false, message: '', type: '' }), 6000);
     }
   };
 
   return (
     <div className="min-h-screen bg-[#FDFDFB] font-sans text-slate-600 selection:bg-primary/20 flex flex-col">
-      {/* Toast */}
+      {/* Toast Notification */}
       {toast.show && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-top-4">
-          <div className={`px-6 py-4 rounded-2xl shadow-2xl border flex items-center gap-3 ${toast.type === 'success' ? 'bg-emerald-500 border-emerald-600 text-white' : 'bg-rose-500 border-rose-600 text-white'}`}>
-            <span className="material-symbols-outlined">{toast.type === 'success' ? 'check_circle' : 'error'}</span>
-            <span className="font-bold text-sm tracking-wide">{toast.message}</span>
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className={`px-6 py-4 rounded-2xl shadow-2xl border flex items-center gap-3 ${toast.type === 'success' ? 'bg-emerald-600 border-emerald-700 text-white shadow-emerald-900/20' : 'bg-rose-600 border-rose-700 text-white shadow-rose-900/20'}`}>
+            {toast.type === 'success' ? (
+              <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+            ) : (
+              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            )}
+            <span className="font-semibold text-sm tracking-wide">{toast.message}</span>
           </div>
         </div>
       )}
@@ -155,50 +234,118 @@ const Support = () => {
                 </div>
 
                 <form onSubmit={handleTicketSubmit} className="space-y-6">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Issue Category</label>
-                    <select 
-                      value={ticketData.issue_type}
-                      onChange={(e) => setTicketData({...ticketData, issue_type: e.target.value})}
-                      className="w-full h-14 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all appearance-none cursor-pointer"
-                    >
-                      <option>Technical Issue</option>
-                      <option>Account Access</option>
-                      <option>Logbook Error</option>
-                      <option>Institution Inquiry</option>
-                    </select>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <User className="w-3.5 h-3.5" /> Full Name
+                      </label>
+                      <input
+                        required
+                        value={ticketData.name}
+                        onChange={(e) => setTicketData({ ...ticketData, name: e.target.value })}
+                        className="w-full h-14 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-slate-400"
+                        placeholder="e.g. John Doe"
+                        type="text"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <Mail className="w-3.5 h-3.5" /> Email Address
+                      </label>
+                      <input
+                        required
+                        value={ticketData.user_email}
+                        onChange={(e) => setTicketData({ ...ticketData, user_email: e.target.value })}
+                        className="w-full h-14 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-slate-400"
+                        placeholder="e.g. name@example.com"
+                        type="email"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <Tag className="w-3.5 h-3.5" /> User Role
+                      </label>
+                      <select 
+                        value={ticketData.user_type}
+                        onChange={(e) => setTicketData({ ...ticketData, user_type: e.target.value })}
+                        className="w-full h-14 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all appearance-none cursor-pointer"
+                      >
+                        <option value="Student">Student</option>
+                        <option value="School Supervisor">School Supervisor</option>
+                        <option value="Organization Supervisor">Organization Supervisor</option>
+                        <option value="School">School / Institution</option>
+                        <option value="Organization">Organization / Employer</option>
+                        <option value="Guest">Guest / General User</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <Tag className="w-3.5 h-3.5" /> Issue Category
+                      </label>
+                      <select 
+                        value={ticketData.issue_type}
+                        onChange={(e) => setTicketData({ ...ticketData, issue_type: e.target.value })}
+                        className="w-full h-14 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all appearance-none cursor-pointer"
+                      >
+                        <option value="Technical Issue">Technical Issue</option>
+                        <option value="Account Access">Account Access</option>
+                        <option value="Logbook Error">Logbook Error</option>
+                        <option value="Institution Inquiry">Institution Inquiry</option>
+                        <option value="Placement Issue">Placement Issue</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Subject</label>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                      <FileText className="w-3.5 h-3.5" /> Subject
+                    </label>
                     <input
                       required
                       value={ticketData.subject}
-                      onChange={(e) => setTicketData({...ticketData, subject: e.target.value})}
-                      className="w-full h-14 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                      onChange={(e) => setTicketData({ ...ticketData, subject: e.target.value })}
+                      className="w-full h-14 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all placeholder:text-slate-400"
                       placeholder="Briefly summarize the problem..."
                       type="text"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Detailed Description</label>
+                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                      <FileText className="w-3.5 h-3.5" /> Detailed Description
+                    </label>
                     <textarea
                       required
                       value={ticketData.description}
-                      onChange={(e) => setTicketData({...ticketData, description: e.target.value})}
-                      className="w-full p-5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all resize-none"
+                      onChange={(e) => setTicketData({ ...ticketData, description: e.target.value })}
+                      className="w-full p-5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all resize-none placeholder:text-slate-400"
                       placeholder="Please provide as much detail as possible to help us resolve the issue quickly..."
                       rows="6"
                     ></textarea>
                   </div>
 
                   <button 
+                    type="submit"
                     disabled={submitting}
                     className="w-full h-16 bg-primary text-white rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#001530] hover:shadow-[0_15px_30px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none mt-8"
                   >
-                    {submitting ? 'Sending Request...' : 'Submit Support Ticket'}
-                    <Send className="w-4 h-4" />
+                    {submitting ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>Submitting Ticket...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Submit Support Ticket</span>
+                        <Send className="w-4 h-4" />
+                      </>
+                    )}
                   </button>
                 </form>
               </div>
