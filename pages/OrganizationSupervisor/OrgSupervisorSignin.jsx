@@ -10,7 +10,7 @@ const OrgSupervisorSignin = () => {
   const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate()
     const { showAlert } = useDialog()
-    const { setOrganizationSupervisorCred } = useContext(context)
+    const { setOrganizationSupervisorCred, clearAllCreds } = useContext(context)
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
@@ -27,6 +27,7 @@ const OrgSupervisorSignin = () => {
         })
         .then((res) => {
             const supervisorData = res?.data?.message
+            clearAllCreds()
             setOrganizationSupervisorCred(supervisorData)
             showAlert('Welcome, ' + (supervisorData?.Full_Name || 'Industry Supervisor'))
             navigate('/organization-supervisor/dashboard')

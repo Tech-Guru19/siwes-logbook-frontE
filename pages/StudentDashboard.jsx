@@ -15,7 +15,7 @@ const StudentDashboard = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { showAlert } = useDialog();
-  const { studentCred } = useContext(context);
+  const { studentCred, clearAllCreds } = useContext(context);
   const [showPlacementModal, setShowPlacementModal] = useState(false);
   const [organizations, setOrganizations] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -194,7 +194,10 @@ const StudentDashboard = () => {
             <p className="text-[10px] text-slate-500 truncate">{studentCred?.Email_Address}</p>
           </div>
           <button
-            onClick={() => navigate("/")}
+            onClick={() => {
+              clearAllCreds();
+              navigate("/");
+            }}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 text-rose-500 bg-rose-50 hover:bg-rose-100 transition-colors rounded-xl font-bold text-xs uppercase tracking-widest"
           >
             <LogOut className="w-4 h-4" />

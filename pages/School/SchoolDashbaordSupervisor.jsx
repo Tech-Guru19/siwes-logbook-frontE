@@ -12,7 +12,7 @@ const SchoolDashbaordSupervisor = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const navigate = useNavigate()
     const { showAlert, showConfirm } = useDialog()
-    const { schoolCred, studentList, schoolDepartments, schoolSupervisors, setSchoolSupervisors } = useContext(context)
+    const { schoolCred, studentList, schoolDepartments, schoolSupervisors, setSchoolSupervisors, clearAllCreds } = useContext(context)
     const [fullName, setFullName] = useState("")
     const [emailAddress, setEmailAddress] = useState('')
     const [Department, setDepartment] = useState("")
@@ -219,7 +219,7 @@ const SchoolDashbaordSupervisor = () => {
 
                 <div className="mt-auto px-4 space-y-4">
                     <div className="pt-4 border-t border-slate-100">
-                        <button onClick={() => navigate("/")} className="w-full flex items-center justify-center gap-2 px-4 py-3 text-rose-500 bg-rose-50 hover:bg-rose-100 transition-colors rounded-xl font-bold text-xs uppercase tracking-widest">
+                        <button onClick={() => { clearAllCreds(); navigate("/"); }} className="w-full flex items-center justify-center gap-2 px-4 py-3 text-rose-500 bg-rose-50 hover:bg-rose-100 transition-colors rounded-xl font-bold text-xs uppercase tracking-widest">
                             <LogOut className="w-4 h-4" /> Logout
                         </button>
                     </div>

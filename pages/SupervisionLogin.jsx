@@ -10,7 +10,7 @@ const SupervisionLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate()
   const { showAlert } = useDialog()
-  const { setSchoolSupervisorCred } = useContext(context)
+  const { setSchoolSupervisorCred, clearAllCreds } = useContext(context)
   const [emailAddress, setEmailAddress] = useState('')
   const [password, setPassword] = useState('')
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
@@ -27,6 +27,7 @@ const SupervisionLogin = () => {
     })
     .then((res) => {
       const supervisorData = res?.data?.message
+      clearAllCreds()
       setSchoolSupervisorCred(supervisorData)
       showAlert('Welcome back, ' + (supervisorData?.Full_Name || 'Academic Supervisor'))
       navigate('/supervisor-dashboard')

@@ -11,7 +11,7 @@ const SupervisorDashboard = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { showAlert } = useDialog();
-  const { schoolSupervisorCred } = useContext(context);
+  const { schoolSupervisorCred, clearAllCreds } = useContext(context);
   const [logbooks, setLogbooks] = useState([]);
   const [students, setStudents] = useState([]);
   const [activeTab, setActiveTab] = useState("roster"); // "roster" or "grading"
@@ -120,7 +120,7 @@ const SupervisorDashboard = () => {
             <p className="text-xs font-bold text-slate-800 truncate">{schoolSupervisorCred?.Full_Name}</p>
             <p className="text-[10px] text-slate-500 truncate">{schoolSupervisorCred?.Email_Address || 'Lecturer'}</p>
           </div>
-          <button onClick={() => navigate("/")} className="w-full flex items-center justify-center gap-2 px-4 py-3 text-rose-500 bg-rose-50 hover:bg-rose-100 transition-colors rounded-xl font-bold text-xs uppercase tracking-widest">
+          <button onClick={() => { clearAllCreds(); navigate("/"); }} className="w-full flex items-center justify-center gap-2 px-4 py-3 text-rose-500 bg-rose-50 hover:bg-rose-100 transition-colors rounded-xl font-bold text-xs uppercase tracking-widest">
             <LogOut className="w-4 h-4" />
             Sign Out
           </button>

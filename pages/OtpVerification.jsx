@@ -7,7 +7,7 @@ import { Shield, Clock, ArrowLeft, Loader2 } from "lucide-react";
 const OtpVerification = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { setAdminCred } = useContext(context);
+  const { setAdminCred, clearAllCreds } = useContext(context);
   const [otp, setOpt] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -28,6 +28,7 @@ const OtpVerification = () => {
         });
         
         if (res.data.status === "OK") {
+          clearAllCreds();
           setAdminCred(location.state.adminData);
           navigate("/Admin/Dashboard");
         }

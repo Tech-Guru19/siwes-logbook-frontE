@@ -10,7 +10,7 @@ import { useDialog } from '../../src/context/DialogContext'
 const OrgSupervisorDashboard = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const navigate = useNavigate()
-    const { organizationSupervisorCred } = useContext(context)
+    const { organizationSupervisorCred, clearAllCreds } = useContext(context)
     const { showAlert, showConfirm } = useDialog()
     const [logbooks, setLogbooks] = useState([])
     const [assignedStudents, setAssignedStudents] = useState([])
@@ -164,7 +164,10 @@ const OrgSupervisorDashboard = () => {
                         <p className="text-[10px] text-slate-500 truncate">{organizationSupervisorCred?.Email_Address}</p>
                     </div>
                     <button
-                        onClick={() => navigate("/")}
+                        onClick={() => {
+                            clearAllCreds();
+                            navigate("/");
+                        }}
                         className="w-full flex items-center justify-center gap-2 px-4 py-3 text-rose-500 bg-rose-50 hover:bg-rose-100 transition-colors rounded-xl font-bold text-xs uppercase tracking-widest"
                     >
                         <LogOut className="w-4 h-4" />

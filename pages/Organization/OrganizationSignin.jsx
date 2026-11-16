@@ -10,7 +10,7 @@ const OrganizationSignin = () => {
   const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate()
     const { showAlert } = useDialog()
-    const { setOrganizationCred } = useContext(context)
+    const { setOrganizationCred, clearAllCreds } = useContext(context)
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
@@ -27,6 +27,7 @@ const OrganizationSignin = () => {
         })
         .then((res) => {
             const orgData = res?.data?.message
+            clearAllCreds()
             setOrganizationCred(orgData)
             showAlert('Welcome back, ' + (orgData?.Name || 'Organization Admin'))
             navigate('/organization/dashboard')

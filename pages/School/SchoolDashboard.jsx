@@ -12,7 +12,7 @@ import {
 
 const SchoolDashboard = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const { schoolCred, studentList, setStudentList, setSchoolDepartments, schoolSupervisors, setSchoolSupervisors } = useContext(context)
+    const { schoolCred, studentList, setStudentList, setSchoolDepartments, schoolSupervisors, setSchoolSupervisors, clearAllCreds } = useContext(context)
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -74,7 +74,7 @@ const SchoolDashboard = () => {
                         <UserPlus className="w-4 h-4" /> Add Student
                     </button>
                     <div className="pt-4 border-t border-slate-100">
-                        <button onClick={() => navigate("/")} className="w-full flex items-center justify-center gap-2 px-4 py-3 text-rose-500 bg-rose-50 hover:bg-rose-100 transition-colors rounded-xl font-bold text-xs uppercase tracking-widest">
+                        <button onClick={() => { clearAllCreds(); navigate("/"); }} className="w-full flex items-center justify-center gap-2 px-4 py-3 text-rose-500 bg-rose-50 hover:bg-rose-100 transition-colors rounded-xl font-bold text-xs uppercase tracking-widest">
                             <LogOut className="w-4 h-4" /> Logout
                         </button>
                     </div>

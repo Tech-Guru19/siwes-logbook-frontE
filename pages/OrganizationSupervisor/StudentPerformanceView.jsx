@@ -8,7 +8,7 @@ import {
     ArrowLeft, Sparkles, Phone, MapPin, Landmark, FileText, 
     ExternalLink, TrendingUp, History, CalendarOff, CheckCircle2, 
     XCircle, ClipboardCheck, MessageSquare, Clock, Image as ImageIcon,
-    Building2, Mail, Users, Star
+    Building2, Mail, Users, Star, Loader2
 } from 'lucide-react'
 import { useDialog } from '../../src/context/DialogContext'
 
@@ -22,6 +22,9 @@ const StudentPerformanceView = () => {
     const [evaluation, setEvaluation] = useState(null)
     const [leaveRequests, setLeaveRequests] = useState([])
     const [loading, setLoading] = useState(true)
+    const [submittingEval, setSubmittingEval] = useState(false)
+    const [isEditingEval, setIsEditingEval] = useState(false)
+    const [updatingLeaveId, setUpdatingLeaveId] = useState(null)
 
     // Form state for evaluation
     const [evalForm, setEvalForm] = useState({
@@ -30,19 +33,51 @@ const StudentPerformanceView = () => {
         final_remarks: ''
     })
 
-    const isOrgSupervisor = !!organizationSupervisorCred;
-    const isOrganization = !!organizationCred;
-    const isSchoolSupervisor = !!schoolSupervisorCred;
-    const isSchoolAdmin = !!schoolCred;
-    const isStudent = !!studentCred;
+    // Strict role derivation to prevent credential bleeding
+    const isIndustrySupervisor = Boolean(
+        organizationSupervisorCred && 
+        !studentCred && 
+        !schoolSupervisorCred && 
+        !schoolCred && 
+        !organizationCred
+    );
+    const isOrganization = Boolean(organizationCred && !studentCred && !schoolSupervisorCred && !schoolCred && !organizationSupervisorCred);
+    const isSchoolSupervisor = Boolean(schoolSupervisorCred && !studentCred && !schoolCred);
+    const isSchoolAdmin = Boolean(schoolCred && !studentCred);
+    const isStudent = Boolean(studentCred);
+
+    // Only the assigned industry supervisor can grade or update final evaluations
+    const canGradeEvaluation = Boolean(
+        isIndustrySupervisor &&
+        organizationSupervisorCred?.id &&
+        student && (
+            (student.Organization_Supervisor_Id && Number(student.Organization_Supervisor_Id) === Number(organizationSupervisorCred.id)) ||
+            (!student.Organization_Supervisor_Id && (!student.Organization_Id || !organizationSupervisorCred.Organization_Id || Number(student.Organization_Id) === Number(organizationSupervisorCred.Organization_Id)))
+        )
+    );
 
     useEffect(() => {
-        if (!isOrgSupervisor && !isSchoolSupervisor && !isSchoolAdmin && !isStudent && !isOrganization) {
+        if (!organizationSupervisorCred && !schoolSupervisorCred && !schoolCred && !studentCred && !organizationCred) {
             navigate('/register/accountType')
             return
         }
         fetchData()
     }, [id])
+
+    useEffect(() => {
+        if (evaluation) {
+            setEvalForm({
+                attendance_score: evaluation.attendance_score || '',
+                attitude_score: evaluation.attitude_score || '',
+                work_quality_score: evaluation.work_quality_score || '',
+                independence_score: evaluation.independence_score || '',
+                professionalism_score: evaluation.professionalism_score || '',
+                communication_score: evaluation.communication_score || '',
+                leadership_score: evaluation.leadership_score || '',
+                final_remarks: evaluation.final_remarks || ''
+            })
+        }
+    }, [evaluation])
 
     const fetchData = async () => {
         try {
@@ -76,8 +111,17 @@ const StudentPerformanceView = () => {
 
     const handleEvaluationSubmit = async (e) => {
         e.preventDefault()
-        if (Object.values(evalForm).some(v => v === '')) {
-            showAlert("Please fill in all evaluation fields.")
+        if (!canGradeEvaluation) {
+            showAlert("Access denied: Only the assigned Industry Supervisor can grade final evaluations.")
+            return
+        }
+
+        const requiredKeys = [
+            'attendance_score', 'attitude_score', 'work_quality_score',
+            'independence_score', 'professionalism_score', 'communication_score', 'leadership_score'
+        ]
+        if (requiredKeys.some(key => !evalForm[key])) {
+            showAlert("Please select a grade for all evaluation criteria.")
             return
         }
 
@@ -88,6 +132,7 @@ const StudentPerformanceView = () => {
             gradeValue[evalForm.professionalism_score] + gradeValue[evalForm.communication_score] +
             gradeValue[evalForm.leadership_score];
 
+        setSubmittingEval(true)
         try {
             await axios.post('https://siwes-logbook-backend.onrender.com/org-supervisor/evaluate', {
                 student_id: id,
@@ -95,17 +140,25 @@ const StudentPerformanceView = () => {
                 ...evalForm,
                 total_score
             })
-            showAlert("Evaluation submitted successfully!")
-            fetchData()
+            showAlert(evaluation ? "Evaluation updated successfully!" : "Evaluation submitted successfully!")
+            setIsEditingEval(false)
+            await fetchData()
         } catch (error) {
             console.error(error)
-            showAlert("Failed to submit evaluation")
+            showAlert(error?.response?.data?.message || "Failed to submit evaluation")
+        } finally {
+            setSubmittingEval(false)
         }
     }
 
     const handleLeaveAction = async (leave_id, status) => {
+        if (!canGradeEvaluation) {
+            showAlert("Access denied: Only the assigned Industry Supervisor can manage leave requests.");
+            return;
+        }
         const confirmResult = await showConfirm(`Are you sure you want to ${status} this leave request?`);
         if (!confirmResult) return;
+        setUpdatingLeaveId(leave_id);
         try {
             await axios.post('https://siwes-logbook-backend.onrender.com/leave/update-status', {
                 leave_id,
@@ -117,6 +170,8 @@ const StudentPerformanceView = () => {
         } catch (error) {
             console.error(error);
             showAlert(error?.response?.data?.message || "Failed to update leave request");
+        } finally {
+            setUpdatingLeaveId(null);
         }
     };
 
@@ -425,19 +480,31 @@ const StudentPerformanceView = () => {
                                                 <p className="text-sm text-slate-700 font-light">"{req.reason}"</p>
                                             </div>
                                             
-                                            {isOrgSupervisor && req.status === 'pending' && (
+                                            {canGradeEvaluation && req.status === 'pending' && (
                                                 <div className="flex items-center gap-3 shrink-0 pt-4 md:pt-0 md:pl-6 border-t md:border-t-0 md:border-l border-slate-200">
                                                     <button 
+                                                        disabled={updatingLeaveId === req.id}
                                                         onClick={() => handleLeaveAction(req.id, 'rejected')}
-                                                        className="flex-1 md:flex-none px-4 py-2 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-xl flex items-center justify-center gap-2 transition-colors font-bold text-[10px] uppercase tracking-widest"
+                                                        className="flex-1 md:flex-none px-4 py-2 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-xl flex items-center justify-center gap-2 transition-colors font-bold text-[10px] uppercase tracking-widest disabled:opacity-50"
                                                     >
-                                                        <XCircle className="w-4 h-4" /> Reject
+                                                        {updatingLeaveId === req.id ? (
+                                                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                        ) : (
+                                                            <XCircle className="w-4 h-4" />
+                                                        )}
+                                                        Reject
                                                     </button>
                                                     <button 
+                                                        disabled={updatingLeaveId === req.id}
                                                         onClick={() => handleLeaveAction(req.id, 'approved')}
-                                                        className="flex-1 md:flex-none px-4 py-2 bg-emerald-50 border border-emerald-100 text-emerald-600 hover:bg-emerald-100 rounded-xl flex items-center justify-center gap-2 transition-colors font-bold text-[10px] uppercase tracking-widest"
+                                                        className="flex-1 md:flex-none px-4 py-2 bg-emerald-50 border border-emerald-100 text-emerald-600 hover:bg-emerald-100 rounded-xl flex items-center justify-center gap-2 transition-colors font-bold text-[10px] uppercase tracking-widest disabled:opacity-50"
                                                     >
-                                                        <CheckCircle2 className="w-4 h-4" /> Approve
+                                                        {updatingLeaveId === req.id ? (
+                                                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                        ) : (
+                                                            <CheckCircle2 className="w-4 h-4" />
+                                                        )}
+                                                        Approve
                                                     </button>
                                                 </div>
                                             )}
@@ -451,15 +518,26 @@ const StudentPerformanceView = () => {
                     {/* Evaluation Column */}
                     <div className="lg:col-span-1">
                         <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-[0_20px_50px_rgba(0,32,69,0.03)] sticky top-8">
-                            <h3 className="text-xl font-serif text-slate-900 mb-2 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center">
-                                    <ClipboardCheck className="text-indigo-500 w-5 h-5" />
-                                </div>
-                                Final Evaluation
-                            </h3>
+                            <div className="flex items-center justify-between mb-2">
+                                <h3 className="text-xl font-serif text-slate-900 flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center">
+                                        <ClipboardCheck className="text-indigo-500 w-5 h-5" />
+                                    </div>
+                                    Final Evaluation
+                                </h3>
+                                {evaluation && canGradeEvaluation && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsEditingEval(!isEditingEval)}
+                                        className="px-3.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all"
+                                    >
+                                        {isEditingEval ? "Cancel" : "Edit Grade"}
+                                    </button>
+                                )}
+                            </div>
                             <p className="text-xs text-slate-500 font-light mb-8">Comprehensive performance metrics based on ITF Assessment standards.</p>
 
-                            {evaluation ? (
+                            {evaluation && !isEditingEval ? (
                                 <div className="space-y-8">
                                     <div className="h-64 w-full">
                                         <ResponsiveContainer width="100%" height="100%">
@@ -500,7 +578,7 @@ const StudentPerformanceView = () => {
                                         </div>
                                     )}
                                 </div>
-                            ) : isOrgSupervisor ? (
+                            ) : canGradeEvaluation ? (
                                 <form onSubmit={handleEvaluationSubmit} className="space-y-5">
                                     {[
                                         { key: 'attendance_score', label: 'Attendance & Punctuality' },
@@ -538,15 +616,40 @@ const StudentPerformanceView = () => {
                                             placeholder="Final comments on student's performance..."
                                         />
                                     </div>
-                                    <button type="submit" className="w-full h-14 bg-primary text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 mt-4">
-                                        <ClipboardCheck className="w-4 h-4" />
-                                        Submit Evaluation
+                                    <button 
+                                        type="submit" 
+                                        disabled={submittingEval}
+                                        className="w-full h-14 bg-primary text-white font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-[#001530] hover:shadow-[0_10px_20px_rgba(0,32,69,0.15)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 mt-4 disabled:opacity-70 disabled:hover:translate-y-0 cursor-pointer"
+                                    >
+                                        {submittingEval ? (
+                                            <>
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                <span>Saving Evaluation...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <ClipboardCheck className="w-4 h-4" />
+                                                <span>{evaluation ? "Update Evaluation" : "Submit Evaluation"}</span>
+                                            </>
+                                        )}
                                     </button>
                                 </form>
                             ) : (
-                                <div className="p-10 text-center text-slate-400 font-light border border-dashed border-slate-200 rounded-2xl bg-slate-50">
-                                    <ClipboardCheck className="w-8 h-8 text-slate-300 mx-auto mb-4" />
-                                    Industry Supervisor has not submitted the final evaluation yet.
+                                <div className="p-8 text-center border border-dashed border-slate-200 rounded-2xl bg-slate-50/70 space-y-3">
+                                    <div className="w-12 h-12 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center mx-auto text-indigo-500">
+                                        <ClipboardCheck className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-serif text-slate-800">Awaiting Industry Assessment</p>
+                                        <p className="text-xs text-slate-500 font-light mt-1 leading-relaxed">
+                                            The final ITF evaluation can only be graded by the student's assigned Industry-based Supervisor upon completion of their placement.
+                                        </p>
+                                    </div>
+                                    <div className="pt-2">
+                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-slate-200 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                            <Clock className="w-3 h-3 text-amber-500" /> Pending Industry Grading
+                                        </span>
+                                    </div>
                                 </div>
                             )}
                         </div>

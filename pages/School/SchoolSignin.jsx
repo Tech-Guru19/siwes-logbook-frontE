@@ -8,7 +8,7 @@ import ForgotPasswordModal from '../../src/components/Auth/ForgotPasswordModal'
 
 const SchoolSignin = () => {
   const [showPassword, setShowPassword] = useState(false);
-    const { setSchoolCred } = useContext(context)
+    const { setSchoolCred, clearAllCreds } = useContext(context)
     const navigate = useNavigate()
     const { showAlert } = useDialog()
     const [mail, setMail] = useState("")
@@ -25,6 +25,7 @@ const SchoolSignin = () => {
             password
         })
             .then((output) => {
+                clearAllCreds()
                 setSchoolCred(output?.data?.message)
                 navigate("/school/dashboard")
             })

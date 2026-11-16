@@ -11,7 +11,7 @@ const DailyLogs = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { showAlert, showConfirm } = useDialog();
-  const { studentCred } = useContext(context);
+  const { studentCred, clearAllCreds } = useContext(context);
   const [logs, setLogs] = useState([]);
   
   const [entryDate, setEntryDate] = useState(new Date().toISOString().split("T")[0]);
@@ -252,7 +252,10 @@ const DailyLogs = () => {
 
         <div className="mt-auto px-4">
           <button
-            onClick={() => navigate("/")}
+            onClick={() => {
+              clearAllCreds();
+              navigate("/");
+            }}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 text-rose-500 bg-rose-50 hover:bg-rose-100 transition-colors rounded-xl font-bold text-xs uppercase tracking-widest"
           >
             <LogOut className="w-4 h-4" />

@@ -10,7 +10,7 @@ const Signin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { showAlert } = useDialog();
-  const { setStudentCred } = useContext(context);
+  const { setStudentCred, clearAllCreds } = useContext(context);
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
@@ -27,6 +27,7 @@ const Signin = () => {
     })
     .then((res) => {
       const studentData = res?.data?.message;
+      clearAllCreds();
       setStudentCred(studentData);
       showAlert("Welcome back, " + (studentData?.Full_Name || "Student"));
       navigate("/student-dashboard");

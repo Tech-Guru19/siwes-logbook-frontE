@@ -45,6 +45,15 @@ const App = () => {
   const [organizationSupervisorCred, setOrganizationSupervisorCred] = useState()
   const [adminCred, setAdminCred] = useState()
 
+  const clearAllCreds = () => {
+    setSchoolCred(null);
+    setStudentCred(null);
+    setSchoolSupervisorCred(null);
+    setOrganizationCred(null);
+    setOrganizationSupervisorCred(null);
+    setAdminCred(null);
+  };
+
   return (
     <context.Provider value={{
       schoolCred, setSchoolCred,
@@ -55,7 +64,8 @@ const App = () => {
       schoolSupervisorCred, setSchoolSupervisorCred,
       organizationCred, setOrganizationCred,
       organizationSupervisorCred, setOrganizationSupervisorCred,
-      adminCred, setAdminCred
+      adminCred, setAdminCred,
+      clearAllCreds
     }}>
       <Routes>
         <Route path="/" element={<Home/>} />

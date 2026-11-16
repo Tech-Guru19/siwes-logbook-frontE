@@ -10,7 +10,7 @@ import { parseExcelFile, exportToExcel } from '../../src/utils/excelUtils'
 
 const SchoolDepartmentDashboard = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const { schoolCred, studentList, schoolDepartments, setSchoolDepartments } = useContext(context)
+    const { schoolCred, studentList, schoolDepartments, setSchoolDepartments, clearAllCreds } = useContext(context)
     const navigate = useNavigate()
     const { showAlert, showConfirm } = useDialog()
     const [departmentName, setdepartmentName] = useState("")
@@ -201,7 +201,7 @@ const SchoolDepartmentDashboard = () => {
 
                 <div className="mt-auto px-4 space-y-4">
                     <div className="pt-4 border-t border-slate-100">
-                        <button onClick={() => navigate("/")} className="w-full flex items-center justify-center gap-2 px-4 py-3 text-rose-500 bg-rose-50 hover:bg-rose-100 transition-colors rounded-xl font-bold text-xs uppercase tracking-widest">
+                        <button onClick={() => { clearAllCreds(); navigate("/"); }} className="w-full flex items-center justify-center gap-2 px-4 py-3 text-rose-500 bg-rose-50 hover:bg-rose-100 transition-colors rounded-xl font-bold text-xs uppercase tracking-widest">
                             <LogOut className="w-4 h-4" /> Logout
                         </button>
                     </div>
