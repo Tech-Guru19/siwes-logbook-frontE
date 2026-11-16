@@ -123,8 +123,8 @@ const Signin = () => {
             </button>
 
             <div className="text-center pt-6 border-t border-slate-100 mt-8">
-              <p className="text-center text-sm font-medium text-slate-500 mt-6">
-                New here? <Link to="/register/student" className="text-primary font-bold hover:underline underline-offset-4">Create Student Account</Link>
+              <p className="text-center text-sm font-medium text-slate-500">
+                Visit your institutional coordinator
               </p>
             </div>
           </form>
