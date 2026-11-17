@@ -74,6 +74,19 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleDeleteTicket = async (id) => {
+        const confirm = await showConfirm("Are you sure you want to delete this support ticket? This action cannot be undone.");
+        if (!confirm) return;
+        try {
+            await axios.post('https://siwes-logbook-backend.onrender.com/admin/tickets/delete', { id });
+            showAlert("Ticket deleted successfully.");
+            fetchAllData();
+        } catch (error) {
+            console.error(error);
+            showAlert("Error deleting ticket.");
+        }
+    };
+
     const handleDelete = async (type, id) => {
         const confirm = await showConfirm("Are you sure you want to delete this record? This action cannot be undone.");
         if (!confirm) return;
@@ -134,8 +147,8 @@ const AdminDashboard = () => {
         <div className="flex bg-[#FDFDFB] min-h-screen font-sans selection:bg-primary/20 text-slate-600">
             {/* Premium Sidebar */}
             {mobileMenuOpen && <div className="fixed inset-0 bg-slate-900/20 z-40 lg:hidden backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}></div>}
-        <aside className={`h-screen w-72 border-r border-slate-100 fixed left-0 top-0 bg-white flex flex-col py-8 z-50 shadow-[4px_0_24px_rgba(0,32,69,0.02)] transition-transform duration-300 lg:translate-x-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-                <Logo size="md" className="px-8 mb-12" title="Super Admin" subtitle={adminCred?.email} />
+        <aside className={`h-screen w-72 border-r border-slate-100 fixed left-0 top-0 bg-white flex flex-col py-8 z-50 shadow-[4px_0_24px_rgba(0,32,69,0.02)] transition-transform duration-300 lg:translate-x-0 overflow-hidden ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                <Logo size="md" className="px-6 mb-12 w-full max-w-full overflow-hidden" title="Super Admin" subtitle={adminCred?.email} />
         <button onClick={() => setMobileMenuOpen(false)} className="lg:hidden absolute top-8 right-6 p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors">
           <X className="w-5 h-5" />
         </button>
@@ -456,11 +469,24 @@ const AdminDashboard = () => {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-5 pr-8 text-right">
-                                                {ticket.status !== 'Resolved' && (
-                                                    <button onClick={() => handleResolveTicket(ticket.id)} className="bg-primary text-white text-[10px] uppercase tracking-widest font-bold px-4 py-2 rounded-xl shadow-sm hover:bg-[#001530] hover:shadow-md hover:-translate-y-0.5 transition-all opacity-0 group-hover:opacity-100">
-                                                        Resolve
+                                                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    {ticket.status !== 'Resolved' && (
+                                                        <button 
+                                                            onClick={() => handleResolveTicket(ticket.id)} 
+                                                            className="bg-primary text-white text-[10px] uppercase tracking-widest font-bold px-3.5 py-1.5 rounded-xl shadow-sm hover:bg-[#001530] hover:shadow-md hover:-translate-y-0.5 transition-all"
+                                                            title="Mark as Resolved"
+                                                        >
+                                                            Resolve
+                                                        </button>
+                                                    )}
+                                                    <button 
+                                                        onClick={() => handleDeleteTicket(ticket.id)} 
+                                                        className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 hover:shadow-sm flex items-center justify-center transition-all" 
+                                                        title="Delete Ticket"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
                                                     </button>
-                                                )}
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
