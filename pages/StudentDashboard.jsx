@@ -107,7 +107,10 @@ const StudentDashboard = () => {
 
   const fetchLogs = () => {
     axios.post("https://siwes-logbook-backend.onrender.com/user/student/logbook/fetch", { student_id: studentCred?.id })
-      .then((res) => setLogs(res?.data?.message || []))
+      .then((res) => {
+        const allLogs = res?.data?.message || [];
+        setLogs(allLogs.filter(l => !l.activity_description?.startsWith("LEAVE:")));
+      })
       .catch((err) => console.log(err));
   };
 
@@ -404,7 +407,77 @@ const StudentDashboard = () => {
           )}
         </div>
 
-        {/* Modals */}
+        {/* Leave Requests Card */}
+        <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-[0_20px_50px_rgba(0,32,69,0.03)] space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h3 className="text-xl font-serif text-slate-900 flex items-center gap-3">
+              <div className="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center">
+                <CalendarOff className="text-rose-500 w-5 h-5" />
+              </div>
+              Leave of Absence Requests
+            </h3>
+            <button 
+              onClick={() => setShowLeaveModal(true)} 
+              className="px-5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold uppercase tracking-widest rounded-xl transition-all flex items-center gap-2 self-start sm:self-auto hover:-translate-y-0.5"
+            >
+              <CalendarOff className="w-4 h-4" />
+              Request Leave
+            </button>
+          </div>
+          
+          {leaveRequests.length === 0 ? (
+            <div className="p-8 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+              <div>
+                <p className="text-lg font-serif text-slate-800">No Leave Requests Recorded</p>
+                <p className="text-sm text-slate-500 font-light mt-1">If you need time off from your SIWES placement, submit an official leave request for your industry supervisor to review.</p>
+              </div>
+              <button 
+                onClick={() => setShowLeaveModal(true)} 
+                className="px-6 py-3 bg-primary text-white text-xs font-bold uppercase tracking-widest rounded-full hover:bg-[#001530] hover:shadow-lg hover:-translate-y-0.5 transition-all shrink-0"
+              >
+                Apply for Leave
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {leaveRequests.map((req) => (
+                <div key={req.id} className="p-6 bg-slate-50 border border-slate-100 rounded-2xl flex flex-col justify-between space-y-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Duration</span>
+                      <p className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-slate-400" />
+                        {new Date(req.start_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                        <span className="text-slate-400">→</span>
+                        {new Date(req.end_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                    </div>
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shrink-0 ${
+                      req.status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
+                      req.status === 'rejected' ? 'bg-rose-100 text-rose-700' :
+                      'bg-amber-100 text-amber-700'
+                    }`}>
+                      {req.status === 'approved' ? 'Approved' : req.status === 'rejected' ? 'Rejected' : 'Pending Review'}
+                    </span>
+                  </div>
+
+                  <div>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Reason</span>
+                    <p className="text-sm text-slate-700 font-light italic bg-white p-3 rounded-xl border border-slate-100 leading-relaxed">
+                      "{req.reason}"
+                    </p>
+                  </div>
+
+                  {req.created_at && (
+                    <p className="text-[10px] text-slate-400 font-medium pt-1 border-t border-slate-200/50">
+                      Submitted on {new Date(req.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         {showBankModal && (
           <BankDetailsModal
             profile={detailedProfile}

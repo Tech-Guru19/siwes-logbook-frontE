@@ -7,6 +7,42 @@ import { uploadImg } from "../Cloudinary";
 import { GraduationCap, LayoutDashboard, FileEdit, LogOut, User, AlertTriangle, Edit2, PlusCircle, UploadCloud, Trash2, Loader2, Save, Send, History, Image as ImageIcon, CheckCircle, CalendarDays, Menu, X, Clock } from "lucide-react";
 import { useDialog } from "../src/context/DialogContext";
 
+export const calculateWeekNumber = (targetDateStr, startDateStr) => {
+  if (!targetDateStr || !startDateStr) return 1;
+  const targetStr = typeof targetDateStr === 'string' ? targetDateStr.split('T')[0] : new Date(targetDateStr).toISOString().split('T')[0];
+  const startStr = typeof startDateStr === 'string' ? startDateStr.split('T')[0] : new Date(startDateStr).toISOString().split('T')[0];
+
+  const target = new Date(`${targetStr}T12:00:00`);
+  const start = new Date(`${startStr}T12:00:00`);
+
+  const startDay = start.getDay();
+  const startMondayDiff = startDay === 0 ? -6 : 1 - startDay;
+  const startMonday = new Date(start);
+  startMonday.setDate(start.getDate() + startMondayDiff);
+  startMonday.setHours(0, 0, 0, 0);
+
+  const targetDay = target.getDay();
+  const targetMondayDiff = targetDay === 0 ? -6 : 1 - targetDay;
+  const targetMonday = new Date(target);
+  targetMonday.setDate(target.getDate() + targetMondayDiff);
+  targetMonday.setHours(0, 0, 0, 0);
+
+  const diffTime = targetMonday.getTime() - startMonday.getTime();
+  const diffWeeks = Math.round(diffTime / (1000 * 60 * 60 * 24 * 7));
+  return Math.max(1, diffWeeks + 1);
+};
+
+const getDefaultEntryDate = () => {
+  const now = new Date();
+  const day = now.getDay();
+  if (day === 6) { // Saturday -> Friday
+    now.setDate(now.getDate() - 1);
+  } else if (day === 0) { // Sunday -> Friday
+    now.setDate(now.getDate() - 2);
+  }
+  return now.toISOString().split("T")[0];
+};
+
 const DailyLogs = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -14,7 +50,7 @@ const DailyLogs = () => {
   const { studentCred, clearAllCreds } = useContext(context);
   const [logs, setLogs] = useState([]);
   
-  const [entryDate, setEntryDate] = useState(new Date().toISOString().split("T")[0]);
+  const [entryDate, setEntryDate] = useState(getDefaultEntryDate());
   const [weekNumber, setWeekNumber] = useState(1);
   const [activityDescription, setActivityDescription] = useState("");
   const [imageAttachment, setImageAttachment] = useState("");
@@ -103,20 +139,51 @@ const DailyLogs = () => {
     fetchLogs();
   }, [studentCred]);
 
+  // Automatically recalculate week number when profile or entryDate changes
+  useEffect(() => {
+    if (profile?.Start_Date && entryDate) {
+      setWeekNumber(calculateWeekNumber(entryDate, profile.Start_Date));
+    }
+  }, [entryDate, profile]);
+
   const fetchLogs = () => {
     if (!studentCred?.id) return;
     axios.post("https://siwes-logbook-backend.onrender.com/user/student/logbook/fetch", {
       student_id: studentCred?.id
     })
     .then((res) => {
-      setLogs(res?.data?.message || []);
+      const allLogs = res?.data?.message || [];
+      // Strictly filter out any leave records that were incorrectly placed in logbooks
+      const cleanLogs = allLogs.filter(log => !log.activity_description?.startsWith("LEAVE:"));
+      setLogs(cleanLogs);
     })
     .catch((err) => console.log(err));
+  };
+
+  const handleDateChange = (val) => {
+    if (!val) return;
+    const d = new Date(val + "T12:00:00");
+    const day = d.getDay();
+    if (day === 0 || day === 6) {
+      showAlert("Logbook entries can only be recorded for workdays (Monday to Friday). Weekends are not allowed.");
+      return;
+    }
+    setEntryDate(val);
+    if (profile?.Start_Date) {
+      setWeekNumber(calculateWeekNumber(val, profile.Start_Date));
+    }
   };
 
   const handleSubmitLog = async (e) => {
     e.preventDefault();
     if (!entryDate || !activityDescription) return showAlert("Please fill in entry date and description");
+
+    // Block weekend submissions
+    const entryD = new Date(entryDate + "T12:00:00");
+    const day = entryD.getDay();
+    if (day === 0 || day === 6) {
+      return showAlert("SIWES logbook entries can only be recorded for workdays (Monday to Friday). Weekends are not allowed.");
+    }
 
     const dateExists = logs.some(log => {
       if (isEditing && log.id === editingLogId) return false;
@@ -126,7 +193,7 @@ const DailyLogs = () => {
       return showAlert("You have already recorded a logbook entry for this date.");
     }
 
-    const selectedTime = new Date(entryDate).setHours(0,0,0,0);
+    const selectedTime = new Date(entryDate + "T00:00:00").getTime();
     const todayTime = new Date().setHours(0,0,0,0);
     if (selectedTime > todayTime) {
       return showAlert("Cannot record a logbook entry for a future date.");
@@ -138,6 +205,8 @@ const DailyLogs = () => {
         return showAlert("Cannot record a logbook entry after your SIWES end date.");
       }
     }
+
+    const computedWeek = profile?.Start_Date ? calculateWeekNumber(entryDate, profile.Start_Date) : weekNumber;
 
     setUploading(true);
     let uploadedUrl = imageAttachment;
@@ -171,7 +240,7 @@ const DailyLogs = () => {
         await axios.post("https://siwes-logbook-backend.onrender.com/user/student/logbook/create", {
           student_id: studentCred?.id,
           date: entryDate,
-          week_number: weekNumber,
+          week_number: computedWeek,
           activity_description: activityDescription,
           image_attachment: uploadedUrl || null
         });
@@ -187,8 +256,13 @@ const DailyLogs = () => {
   };
 
   const resetForm = () => {
-    setEntryDate(new Date().toISOString().split("T")[0]);
-    setWeekNumber(1);
+    const defaultDate = getDefaultEntryDate();
+    setEntryDate(defaultDate);
+    if (profile?.Start_Date) {
+      setWeekNumber(calculateWeekNumber(defaultDate, profile.Start_Date));
+    } else {
+      setWeekNumber(1);
+    }
     setActivityDescription("");
     setImageAttachment("");
     setSelectedFile(null);
@@ -200,8 +274,10 @@ const DailyLogs = () => {
   const handleEditClick = (log) => {
     setIsEditing(true);
     setEditingLogId(log.id);
-    setEntryDate(log.date ? new Date(log.date).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]);
-    setWeekNumber(log.week_number || 1);
+    const logDateStr = log.date ? new Date(log.date).toISOString().split("T")[0] : getDefaultEntryDate();
+    setEntryDate(logDateStr);
+    const calculatedWk = profile?.Start_Date ? calculateWeekNumber(logDateStr, profile.Start_Date) : (log.week_number || 1);
+    setWeekNumber(calculatedWk);
     setActivityDescription(log.activity_description || "");
     setImageAttachment(log.image_attachment || "");
     setPreviewUrl(log.image_attachment || "");
@@ -330,23 +406,18 @@ const DailyLogs = () => {
                       return endStr < todayStr ? endStr : todayStr;
                     })()}
                     value={entryDate}
-                    onChange={(e) => setEntryDate(e.target.value)}
+                    onChange={(e) => handleDateChange(e.target.value)}
                     className="w-full h-14 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all disabled:opacity-50 cursor-pointer"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">SIWES Week</label>
-                  <select
-                    required
-                    disabled={isEditing}
-                    value={weekNumber}
-                    onChange={(e) => setWeekNumber(Number(e.target.value))}
-                    className="w-full h-14 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all disabled:opacity-50 cursor-pointer appearance-none"
-                  >
-                    {Array.from({ length: 24 }, (_, i) => (
-                      <option key={i + 1} value={i + 1}>Week {i + 1}</option>
-                    ))}
-                  </select>
+                  <div className="w-full h-14 px-4 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between">
+                    <span className="text-sm font-bold text-primary font-serif">Week {weekNumber}</span>
+                    <span className="text-[10px] uppercase tracking-widest font-bold text-slate-400 bg-white px-2.5 py-1 rounded-md border border-slate-200 shadow-xs">
+                      Auto-Calculated
+                    </span>
+                  </div>
                 </div>
               </div>
 
